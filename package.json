@@ -1,0 +1,19 @@
+{
+  "name": "capy-desktop",
+  "version": "1.0.0",
+  "description": "Capybara 2D Desktop Pet",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "keywords": [
+    "capybara",
+    "desktop-pet",
+    "electron"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^41.7.1"
+  }
+}

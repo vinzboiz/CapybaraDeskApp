@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Capy Desktop Pet</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: transparent;
+    }
+    #pet-canvas {
+      display: block;
+      width: 380px;
+      height: 160px;
+      cursor: grab;
+    }
+    #pet-canvas:active {
+      cursor: grabbing;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="pet-canvas" width="380" height="160"></canvas>
+  <script src="capy.js"></script>
+</body>
+</html>
