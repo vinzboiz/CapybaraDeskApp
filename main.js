@@ -210,11 +210,18 @@ function processNewWorkAsset() {
   }
 }
 
-// Tắt hardware acceleration và GPU Sandbox để tránh lỗi GPU process crash (0x80000003) trên Windows
-app.disableHardwareAcceleration();
-app.commandLine.appendSwitch('disable-gpu');
-app.commandLine.appendSwitch('disable-gpu-sandbox');
-app.commandLine.appendSwitch('no-sandbox');
+// Tối ưu hóa GPU & Ngăn chạy nhiều bản Capybara trùng lặp
+const gotTheLock = app.requestSingleInstanceLock();
+if (!gotTheLock) {
+  app.quit();
+} else {
+  app.on('second-instance', () => {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.show();
+      mainWindow.focus();
+    }
+  });
+}
 
 let mainWindow;
 

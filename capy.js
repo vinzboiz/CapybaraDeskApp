@@ -2251,8 +2251,8 @@ function updateWorkAndHydrationTimers() {
   }
 }
 
-// 15. VÒNG LẶP CHÍNH (TỐI ƯU HÓA CPU: KHÓA 60 FPS & DIRTY RECTANGLE CLEAR)
-const TARGET_FPS = 60;
+// 15. VÒNG LẶP CHÍNH (TỐI ƯU HÓA CPU: KHÓA 45 FPS & DIRTY RECTANGLE CLEAR)
+const TARGET_FPS = 45;
 const FRAME_DURATION = 1000 / TARGET_FPS;
 let lastFrameTimestamp = 0;
 let needsFullClear = true;
