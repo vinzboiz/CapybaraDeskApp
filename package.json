@@ -4,7 +4,38 @@
   "description": "Capybara 2D Desktop Pet",
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "prestart": "cmd /c \"taskkill /f /im electron.exe 2>nul & exit 0\"",
+    "start": "electron .",
+    "dist": "electron-builder --win",
+    "dist:portable": "electron-builder --win portable"
+  },
+  "build": {
+    "appId": "com.capy.desktoppet",
+    "productName": "Capybara Desktop Pet",
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": [
+        "portable",
+        "nsis"
+      ],
+      "icon": "assets/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Capybara Desktop Pet"
+    },
+    "files": [
+      "main.js",
+      "capy.js",
+      "messages.js",
+      "index.html",
+      "assets/**/*"
+    ]
   },
   "keywords": [
     "capybara",
@@ -14,6 +45,7 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "electron": "^41.7.1"
+    "electron": "^41.7.1",
+    "electron-builder": "^24.13.3"
   }
 }

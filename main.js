@@ -241,6 +241,7 @@ function createWindow() {
     skipTaskbar: true,
     resizable: false,
     hasShadow: false,
+    icon: path.join(__dirname, 'assets', 'icon.png'),
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false
@@ -249,6 +250,18 @@ function createWindow() {
 
   mainWindow.setAlwaysOnTop(true, 'screen-saver');
   mainWindow.loadFile('index.html');
+
+  mainWindow.webContents.on('console-message', (event, level, message) => {
+    console.log(`[Capy] ${message}`);
+  });
+
+  mainWindow.webContents.on('did-finish-load', () => {
+    console.log('\n======================================================');
+    console.log(' Capybara Desktop Pet da khoi dong thanh cong!');
+    console.log(' Hay nhin xuong day man hinh desktop de thay Capybara nhe!');
+    console.log(' Cua so nay duy tri app. Thu nho cua so nay lai de choi voi Capy.');
+    console.log('======================================================\n');
+  });
 
   // Mặc định cho phép click xuyên qua các vùng trong suốt của cửa sổ
   mainWindow.setIgnoreMouseEvents(true, { forward: true });

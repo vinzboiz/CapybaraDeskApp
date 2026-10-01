@@ -100,6 +100,66 @@
       background: linear-gradient(135deg, #ec4899, #db2777);
       box-shadow: 0 2px 10px rgba(236, 72, 153, 0.45);
     }
+    .dash-btn.active.hide {
+      background: linear-gradient(135deg, #10b981, #059669);
+      box-shadow: 0 2px 10px rgba(16, 185, 129, 0.45);
+    }
+    .dash-btn.toggle-dash {
+      font-size: 13px;
+      opacity: 0.65;
+      margin-top: 2px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      width: 28px;
+      height: 22px;
+      border-radius: 11px;
+    }
+    .dash-btn.toggle-dash:hover {
+      opacity: 1;
+      background: rgba(255, 255, 255, 0.12);
+      transform: none;
+    }
+    #dashboard.collapsed {
+      padding: 4px;
+      gap: 0;
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      min-width: 36px;
+      min-height: 36px;
+      background: rgba(22, 18, 32, 0.88);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.45);
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+    #dashboard.collapsed:hover {
+      border-color: rgba(255, 200, 80, 0.6);
+      transform: scale(1.08);
+    }
+    #dashboard.collapsed .dash-grip,
+    #dashboard.collapsed #btn-roam,
+    #dashboard.collapsed #btn-bath,
+    #dashboard.collapsed #btn-work,
+    #dashboard.collapsed #btn-hide,
+    #dashboard.collapsed #btn-settings {
+      display: none !important;
+    }
+    #dashboard.collapsed .dash-btn.toggle-dash {
+      margin: 0;
+      border: none;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      opacity: 1;
+      color: #fbbf24;
+      display: flex !important;
+      align-items: center;
+      justify-content: center;
+    }
+    #dashboard.collapsed .dash-btn.toggle-dash .icon {
+      font-size: 16px;
+    }
 
     /* Modal Cài đặt Glassmorphism */
     #settings-modal {
@@ -333,8 +393,14 @@
     <button id="btn-work" class="dash-btn" title="Làm việc">
       <span class="icon">💻</span>
     </button>
+    <button id="btn-hide" class="dash-btn" title="Trốn">
+      <span class="icon">🫣</span>
+    </button>
     <button id="btn-settings" class="dash-btn" title="Cài đặt">
       <span class="icon">⚙️</span>
+    </button>
+    <button id="btn-toggle-dash" class="dash-btn toggle-dash" title="Thu nhỏ thanh công cụ">
+      <span class="icon">😣</span>
     </button>
   </div>
 
@@ -355,7 +421,7 @@
       <div class="setting-row">
         <label for="work-duration-select">Thời lượng:</label>
         <select id="work-duration-select">
-          <option value="30">⚡ 30 giây (Để test)</option>
+          <option value="30">⚡ 30 giây</option>
           <option value="900">15 phút</option>
           <option value="1800">30 phút</option>
           <option value="3600" selected>1 tiếng</option>
@@ -390,7 +456,7 @@
       <div class="setting-row">
         <label for="water-interval-select">Chu kỳ:</label>
         <select id="water-interval-select">
-          <option value="30">⚡ 30 giây (Để test)</option>
+          <option value="30">⚡ 30 giây</option>
           <option value="1800">⏱️ Mỗi 30 phút</option>
           <option value="3600" selected>⏰ Mỗi 1 tiếng</option>
           <option value="7200">⏳ Mỗi 2 tiếng</option>
@@ -407,10 +473,10 @@
       <div class="setting-row">
         <label for="walk-speed-select">Tốc độ:</label>
         <select id="walk-speed-select">
-          <option value="0.35">🐢 Thư thả (Chậm)</option>
-          <option value="0.55" selected>🐾 Bình thường (Chuẩn)</option>
-          <option value="0.95">🏃 Nhanh nhẹn</option>
-          <option value="1.45">⚡ Siêu tốc</option>
+          <option value="1.35">🐢 Thư thả (Chậm)</option>
+          <option value="1.55" selected>🐾 Bình thường (Chuẩn)</option>
+          <option value="1.95">🏃 Nhanh nhẹn</option>
+          <option value="2.45">⚡ Siêu tốc</option>
         </select>
       </div>
     </div>
@@ -420,6 +486,7 @@
     </div>
   </div>
 
+  <script src="messages.js"></script>
   <script src="capy.js"></script>
 </body>
 </html>
