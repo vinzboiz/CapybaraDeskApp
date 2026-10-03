@@ -14,7 +14,7 @@ function resizeCanvas() {
   canvas.height = window.innerHeight;
   groundY = canvas.height - 3;
 }
-let groundY = window.innerHeight - 3;
+var groundY = window.innerHeight - 3;
 resizeCanvas();
 // Cấu hình FPS
 const TARGET_FPS = 45;
@@ -31,31 +31,34 @@ window.addEventListener('resize', () => {
 
 // 2. TẢI TÀI NGUYÊN HÌNH ẢNH PIXEL ART (8 ẢNH)
 const spriteSheet = new Image();
-spriteSheet.src = 'assets/capy_spritesheet.png?v=' + Date.now();
+spriteSheet.src = 'assets/cap/capy_spritesheet.png?v=' + Date.now();
 
 const orangeImg = new Image();
-orangeImg.src = 'assets/orange.png?v=' + Date.now();
+orangeImg.src = 'assets/fruits/orange.png?v=' + Date.now();
 
 const sleepImg = new Image();
-sleepImg.src = 'assets/capy_sleep.png?v=' + Date.now();
+sleepImg.src = 'assets/cap/capy_sleep.png?v=' + Date.now();
 
-const tubImg = new Image();
-tubImg.src = 'assets/tub.png?v=' + Date.now();
+var tubImg = new Image();
+tubImg.src = 'assets/items/tub.png?v=' + Date.now();
 
-const tubBathImg = new Image();
-tubBathImg.src = 'assets/tub_bath.png?v=' + Date.now();
+var tubBathImg = new Image();
+tubBathImg.src = 'assets/cap/tub_bath.png?v=' + Date.now();
 
-const fallenImg = new Image();
-fallenImg.src = 'assets/capy_fallen.png?v=' + Date.now();
+var parachuteImg = new Image();
+parachuteImg.src = 'assets/items/parachute.png?v=' + Date.now();
 
-const deskImg = new Image();
-deskImg.src = 'assets/capy_desk.png?v=' + Date.now();
+var deskImg = new Image();
+deskImg.src = 'assets/items/capy_desk.png?v=' + Date.now();
 
-const workImg = new Image();
-workImg.src = 'assets/capy_work.png?v=' + Date.now();
+var workImg = new Image();
+workImg.src = 'assets/cap/capy_work.png?v=' + Date.now();
 
-const bottleImg = new Image();
-bottleImg.src = 'assets/bottle.png?v=' + Date.now();
+var bottleImg = new Image();
+bottleImg.src = 'assets/items/bottle.png?v=' + Date.now();
+
+var bindleImg = new Image();
+bindleImg.src = 'assets/items/bindle.png?v=' + Date.now();
 
 // Kích thước chuẩn
 const FRAME_W = 420;
@@ -64,16 +67,18 @@ const RENDER_W = 56;
 const RENDER_H = 50;
 const SLEEP_W = 60;
 const SLEEP_H = 47;
-const FALLEN_W = 68;
-const FALLEN_H = 48;
+const PARACHUTE_W = 64;
+const PARACHUTE_H = 64;
+const FALLEN_W = 56;
+const FALLEN_H = 46;
 
 // Kích thước Bàn làm việc & Ghế xoay
-const DESK_W = 76;
-const DESK_H = 76;
-const WORK_H = 82; // Chiều cao ảnh khi có Capy ngồi
+var DESK_W = 76;
+var DESK_H = 76;
+var WORK_H = 82; // Chiều cao ảnh khi có Capy ngồi
 
 // Bồn tắm Onsen
-const tub = {
+var tub = {
   width: 66,
   height: 69,
   x: -999,
@@ -83,7 +88,7 @@ const tub = {
 };
 
 // Bàn làm việc
-const desk = {
+var desk = {
   width: DESK_W,
   height: DESK_H,
   x: -999,
@@ -93,14 +98,13 @@ const desk = {
 };
 
 // 3. MÁY TRẠNG THÁI CAPYBARA
-const CapyState = {
+var CapyState = {
   WALK_RIGHT: 'WALK_RIGHT',
   IDLE_RIGHT: 'IDLE_RIGHT',
   WALK_LEFT: 'WALK_LEFT',
   IDLE_LEFT: 'IDLE_LEFT',
   DRAGGED: 'DRAGGED',
   FALLING: 'FALLING',
-  DIZZY: 'DIZZY',
   LOST_ORANGE: 'LOST_ORANGE',
   SLEEPING: 'SLEEPING',
   BATHING: 'BATHING',
@@ -114,19 +118,34 @@ const CapyState = {
   APPROACHING_DESK: 'APPROACHING_DESK', // Đi dần về hướng bàn để cất đi
   APPROACHING_TUB: 'APPROACHING_TUB',   // Đi dần về hướng xô để cất đi
   HIDING_RUN: 'HIDING_RUN',             // Chạy nhanh sang góc phải để trốn
-  HIDDEN: 'HIDDEN'                      // Đang trốn ở góc phải, hở 10% phần đít
+  HIDDEN: 'HIDDEN',                     // Đang trốn ở góc phải, hở 10% phần đít
+  JUMPING: 'JUMPING',                   // Nhảy vòng cung qua chướng ngại vật (khúc gỗ)
+  WOOD_LOG_INTERACT: 'WOOD_LOG_INTERACT', // Tương tác với khúc gỗ (dừng 2s, lùi đà, nhảy 50/50)
+  HUNGRY_STANDING: 'HUNGRY_STANDING',   // Đứng im đòi ăn
+  HUNGRY_STRIKE_SLEEP: 'HUNGRY_STRIKE_SLEEP', // Ngủ đình công vì không được cho ăn
+  LEAVING_RUNAWAY: 'LEAVING_RUNAWAY',   // Hết năng lượng (0%) bỏ nhà ra đi
+  FETCHING_WATER_GLASS: 'FETCHING_WATER_GLASS', // Chạy đi đón ly nước khổng lồ
+  PUSHING_WATER_GLASS: 'PUSHING_WATER_GLASS',   // Đẩy ly nước khổng lồ vào giữa màn hình
+  WAITING_WATER_DRINK: 'WAITING_WATER_DRINK',   // Đứng chờ người dùng nhấn uống nước
+  RETRACTING_WATER_GLASS: 'RETRACTING_WATER_GLASS', // Đẩy ly rỗng ra ngoài màn hình cất đi
+  RETURNING_TO_TUB: 'RETURNING_TO_TUB',         // Quay lại nhảy vào bồn tắm
+  RETURNING_TO_DESK: 'RETURNING_TO_DESK',       // Quay lại ngồi vào bàn làm việc
+  GATE_ENTER: 'GATE_ENTER',                     // Đi vào cổng dịch chuyển không gian
+  GATE_EMERGE: 'GATE_EMERGE',                   // Bước ra từ cổng không gian sau 1s
+  DIZZY: 'DIZZY'                                // Bị chóng mặt ngã xoay vòng
 };
 
 // Biến đếm dừng lại để nói chuyện trước khi cất bàn/xô
-let retractWaitTimer = 0;
-let retractTarget = null; // 'desk' hoặc 'tub'
-let bathStartTime = 0;
-let bathRelaxSpoken = false;
+var retractWaitTimer = 0;
+var retractTarget = null; // 'desk' hoặc 'tub'
+var nextActionAfterRetract = null;
+var bathStartTime = 0;
+var bathRelaxSpoken = false;
 
-const capy = {
+var capy = {
   x: Math.max(60, window.innerWidth - 280),
   y: groundY,
-  speed: 0.55,
+  speed: 1.55,
   facing: -1, // -1: Trái, 1: Phải
   state: CapyState.WALK_LEFT,
   walkPhase: 0,
@@ -141,155 +160,18 @@ const capy = {
   maxDragHeight: 0
 };
 
-// 4. QUẢ CAM
-const orange = {
-  x: capy.x,
-  y: groundY - RENDER_H - 12,
-  vx: 0,
-  vy: 0,
-  width: 18,
-  height: 19,
-  state: 'ON_HEAD',
-  bounceCount: 0,
-  rotation: 0,
-  rotSpeed: 0
-};
+// 5. HIỆU ỨNG HẠT (Đã tách sang js/effects/particles.js)
 
-// 5. HIỆU ỨNG HẠT
-const zzzParticles = [];
-let zzzSpawnTimer = 0;
-function updateZzz() {
-  if (capy.state === CapyState.SLEEPING) {
-    zzzSpawnTimer++;
-    if (zzzSpawnTimer >= 36) {
-      zzzSpawnTimer = 0;
-      zzzParticles.push({
-        x: 25,
-        y: -30,
-        text: Math.random() > 0.4 ? 'z' : 'Z',
-        opacity: 0.9,
-        vy: -0.45,
-        vx: 0.28
-      });
-    }
-  }
-  for (let i = zzzParticles.length - 1; i >= 0; i--) {
-    const p = zzzParticles[i];
-    p.x += p.vx;
-    p.y += p.vy;
-    p.opacity -= 0.007;
-    if (p.opacity <= 0) zzzParticles.splice(i, 1);
-  }
-}
-function drawZzz(c) {
-  c.save();
-  c.font = 'bold 12px "Courier New", monospace';
-  for (const p of zzzParticles) {
-    c.fillStyle = `rgba(100, 180, 255, ${p.opacity})`;
-    c.fillText(p.text, p.x, p.y);
-  }
-  c.restore();
-}
-
-const steamParticles = [];
-let steamTimer = 0;
-function updateSteam() {
-  if (capy.state === CapyState.BATHING && tub.visible) {
-    steamTimer++;
-    if (steamTimer >= 22) {
-      steamTimer = 0;
-      steamParticles.push({
-        x: tub.x + 16 + Math.random() * (tub.width - 32),
-        y: tub.y + 14,
-        radius: Math.random() * 3 + 2.5,
-        opacity: 0.75,
-        vy: -(Math.random() * 0.35 + 0.35),
-        vx: (Math.random() - 0.5) * 0.3
-      });
-    }
-  }
-  for (let i = steamParticles.length - 1; i >= 0; i--) {
-    const s = steamParticles[i];
-    s.x += s.vx;
-    s.y += s.vy;
-    s.radius += 0.04;
-    s.opacity -= 0.012;
-    if (s.opacity <= 0) steamParticles.splice(i, 1);
-  }
-}
-function drawSteam(c) {
-  if (steamParticles.length === 0) return;
-  c.save();
-  for (const s of steamParticles) {
-    c.fillStyle = `rgba(255, 255, 255, ${s.opacity * 0.55})`;
-    c.beginPath();
-    c.arc(s.x, s.y, s.radius, 0, Math.PI * 2);
-    c.fill();
-  }
-  c.restore();
-}
-
-const impactStars = [];
-function spawnImpactStars(x, y) {
-  for (let i = 0; i < 7; i++) {
-    const angle = (Math.PI * 2 / 7) * i + Math.random() * 0.2;
-    const speed = Math.random() * 2.5 + 1.8;
-    impactStars.push({
-      x, y,
-      vx: Math.cos(angle) * speed,
-      vy: Math.sin(angle) * speed - 1.5,
-      life: 26, maxLife: 26,
-      size: Math.random() * 3 + 3,
-      color: Math.random() > 0.5 ? '#FFD700' : '#FFA500'
-    });
-  }
-}
-
-function spawnWakeStars(x, y) {
-  for (let i = 0; i < 8; i++) {
-    const angle = Math.random() * Math.PI * 2;
-    const speed = Math.random() * 2 + 1;
-    impactStars.push({
-      x, y,
-      vx: Math.cos(angle) * speed,
-      vy: Math.sin(angle) * speed - 1.2,
-      life: 20, maxLife: 20,
-      size: Math.random() * 3 + 2.5,
-      color: '#64B5F6'
-    });
-  }
-}
-
-function updateImpactParticles() {
-  for (let i = impactStars.length - 1; i >= 0; i--) {
-    const p = impactStars[i];
-    p.x += p.vx;
-    p.y += p.vy;
-    p.vy += 0.15;
-    p.life--;
-    if (p.life <= 0) impactStars.splice(i, 1);
-  }
-}
-
-function drawImpactParticles(c) {
-  for (const p of impactStars) {
-    const alpha = p.life / p.maxLife;
-    c.save();
-    c.fillStyle = p.color;
-    c.globalAlpha = alpha;
-    c.beginPath();
-    c.arc(p.x, p.y, p.size * (0.5 + alpha * 0.5), 0, Math.PI * 2);
-    c.fill();
-    c.restore();
-  }
-}
 
 // 6. CƠ CHẾ CLICK-THROUGH
-let isDraggingCapy = false;
+var isDraggingCapy = false;
+window.isDraggingCapy = false;
 let isDraggingTub = false;
 let isDraggingDesk = false;
-let isDraggingDash = false;
-let dashDragCandidate = false;
+let deskClickStartX = 0;
+let deskClickStartY = 0;
+var isDraggingDash = false;
+var dashDragCandidate = false;
 let lastMouseX = 0;
 let lastMouseY = 0;
 let prevDeltaX = 0;
@@ -318,6 +200,17 @@ function isOverInteractive(mx, my) {
     my <= orange.y + orange.height + orangePad
   ) {
     return true;
+  }
+
+  for (const o of groundOranges) {
+    if (
+      mx >= o.x - orangePad &&
+      mx <= o.x + o.width + orangePad &&
+      my >= o.y - orangePad &&
+      my <= o.y + o.height + orangePad
+    ) {
+      return true;
+    }
   }
 
   // 2. Chậu tắm Onsen (nếu đang hiển thị)
@@ -394,46 +287,34 @@ function isOverInteractive(mx, my) {
     }
   }
 
-  // 8. Bình nước (khi có lời nhắc uống nước)
-  if (waterReminderActive) {
-    let bx = 0, by = 0;
-    if (capy.state === CapyState.WORKING && desk.visible) {
-      bx = desk.x + 53; by = groundY - 44;
-    } else if (tub.visible) {
-      bx = tub.x - 22; by = groundY - 3;
-    } else {
-      bx = (capy.facing === 1) ? (capy.x + 28) : (capy.x - 28 - 14);
-      by = groundY - 3;
-    }
-    if (mx >= bx - 8 && mx <= bx + 22 && my >= by - 36 && my <= by + 8) {
+  // 8. Ly nước nhắc uống nước (cao bằng Capybara ~ 50px)
+  if (typeof waterReminderState !== 'undefined' && waterReminderState.glass && waterReminderState.glass.visible) {
+    const g = waterReminderState.glass;
+    if (mx >= g.x - 12 && mx <= g.x + g.width + 12 && my >= groundY - g.height - 15 && my <= groundY + 8) {
       return true;
     }
   }
 
+  // 8. Khúc gỗ chướng ngại vật
+  if (typeof isOverWoodLog === 'function' && isOverWoodLog(mx, my)) return true;
+
   return false;
-}
-
-function dropOrange(dir = 1, impulseY = -3.8) {
-  if (orange.state !== 'ON_HEAD') return;
-  orange.state = 'FALLING';
-  orange.vx = dir * 2.4;
-  orange.vy = impulseY;
-  orange.rotSpeed = dir * 0.18;
-  orange.bounceCount = 0;
-
-  // Khi click vào quả cam trên đầu hoặc đẩy đồ: không hiện ? ngay lập tức.
-  // Capy sẽ tiếp tục bước đi rồi mới ngơ ngác tìm cam sau khoảng 2s tự nhiên.
-  if (!capy.lostNoticeTimer) capy.lostNoticeTimer = 0;
 }
 
 // 7. CẤU HÌNH CÀI ĐẶT & THỜI GIAN LÀM VIỆC / UỐNG NƯỚC / TỐC ĐỘ CHẠY / CHẾ ĐỘ NGỒI MÁY
 const SETTINGS_KEY = 'capy_pet_settings_v2';
-let settings = {
+var settings = {
   workFocusEnabled: true,
   workDurationSec: 3600, // Mặc định 1 tiếng (30s, 15p, 30p, 1h, 2h... 8h)
   waterIntervalSec: 3600, // Mặc định 1 tiếng
-  walkSpeed: 0.55,        // Tốc độ đi dạo mặc định
-  computerMode: 'focus'   // 'focus' (Làm việc tập trung) hoặc 'chill' (Chỉ ngồi máy tính lướt web)
+  walkSpeed: 1.55,        // Tốc độ đi dạo mặc định (Chuẩn)
+  computerMode: 'focus',  // 'focus' (Làm việc tập trung) hoặc 'chill' (Chỉ ngồi máy tính lướt web)
+  hungryIntervalSec: 10,  // Dành cho tương thích cũ
+  hungryStandDurationSec: 10,
+  hungryStrikeTimeoutSec: 15,
+  energyDurationSec: 7200, // Mặc định 2 tiếng tiêu hao hết năng lượng (có option 15s test)
+  orangeModeEnabled: false,
+  woodModeEnabled: false
 };
 
 try {
@@ -443,39 +324,28 @@ try {
     if (typeof settings.walkSpeed === 'number') {
       capy.speed = settings.walkSpeed;
     }
+    if (typeof settings.orangeModeEnabled === 'boolean') {
+      isOrangeModeEnabled = settings.orangeModeEnabled;
+    }
+    if (typeof settings.woodModeEnabled === 'boolean') {
+      isWoodModeEnabled = settings.woodModeEnabled;
+    }
+    if (!settings.energyDurationSec) {
+      settings.energyDurationSec = 7200;
+    }
   }
 } catch (e) {
   console.warn('Lỗi đọc settings:', e);
 }
 
 // Biến trạng thái chu kỳ nước & phiên làm việc
-let lastWaterReminderTime = Date.now();
-let waterReminderActive = false;
-let workSessionStartTime = 0;
-let workSessionActive = false;
+var lastWaterReminderTime = Date.now();
+var waterReminderActive = false;
+var workSessionStartTime = 0;
+var workSessionActive = false;
 
-// Trạng thái lời nói (Speech bubble)
-let speechBubble = {
-  text: '',
-  active: false,
-  expiresAt: 0,
-  persistent: false,
-  isWarning: false
-};
+// Trạng thái lời nói (Đã tách sang js/ui/speech-bubble.js)
 
-function showSpeechBubble(text, durationMs = 3000, isWarning = false) {
-  speechBubble.text = text;
-  speechBubble.active = true;
-  speechBubble.persistent = (durationMs === 0);
-  speechBubble.expiresAt = (durationMs > 0) ? (Date.now() + durationMs) : 0;
-  speechBubble.isWarning = isWarning;
-}
-
-function clearSpeechBubble() {
-  speechBubble.active = false;
-  speechBubble.text = '';
-  speechBubble.persistent = false;
-}
 
 // Kiểm tra phiên làm việc tập trung có đang khóa không (tính từ lúc bắt đầu ngồi vào bàn)
 function isWorkSessionLocked() {
@@ -497,499 +367,190 @@ function getWorkRemainingTimeString() {
   return secs > 0 ? `${mins} phút ${secs} giây` : `${mins} phút`;
 }
 
-// 7. ĐIỀU KHIỂN DASHBOARD
-const btnRoam = document.getElementById('btn-roam');
-const btnBath = document.getElementById('btn-bath');
-const btnWork = document.getElementById('btn-work');
-const btnHide = document.getElementById('btn-hide');
-const btnToggleDash = document.getElementById('btn-toggle-dash');
-const btnSettings = document.getElementById('btn-settings');
-const settingsModalEl = document.getElementById('settings-modal');
-const modalCloseBtn = document.getElementById('modal-close');
-const btnSaveSettings = document.getElementById('btn-save-settings');
-const workFocusToggle = document.getElementById('work-focus-toggle');
-const workDurationSelect = document.getElementById('work-duration-select');
-const waterIntervalSelect = document.getElementById('water-interval-select');
-const walkSpeedSelect = document.getElementById('walk-speed-select');
-const computerModeSelect = document.getElementById('computer-mode-select');
-const btnCancelWork = document.getElementById('btn-cancel-work');
-const workStatusText = document.getElementById('work-status-text');
+// 7. ĐIỀU KHIỂN DASHBOARD (Đã tách sang js/ui/dashboard.js)
 
-function updateDashboardUI(activeType) {
-  btnRoam.classList.remove('active');
-  btnBath.classList.remove('active', 'bath');
-  btnWork.classList.remove('active', 'work');
-  if (btnHide) btnHide.classList.remove('active', 'hide');
 
-  if (activeType === 'roam') {
-    btnRoam.classList.add('active');
-  } else if (activeType === 'bath') {
-    btnBath.classList.add('active', 'bath');
-  } else if (activeType === 'work') {
-    btnWork.classList.add('active', 'work');
-  } else if (activeType === 'hide') {
-    if (btnHide) btnHide.classList.add('active', 'hide');
-  }
-}
+// HÀM BẬT/TẮT MODE CAM (dùng chung cho dashboard + IPC từ Panel)
+function setOrangeMode(enabled) {
+  isOrangeModeEnabled = !!enabled;
+  settings.orangeModeEnabled = isOrangeModeEnabled;
+  try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); } catch (e) {}
 
-// Cập nhật giá trị vào modal form
-function syncSettingsToUI() {
-  if (workFocusToggle) workFocusToggle.checked = !!settings.workFocusEnabled;
-  if (workDurationSelect) workDurationSelect.value = String(settings.workDurationSec || 3600);
-  if (waterIntervalSelect) waterIntervalSelect.value = String(settings.waterIntervalSec || 3600);
-  if (walkSpeedSelect) walkSpeedSelect.value = String(settings.walkSpeed || 0.55);
-  if (computerModeSelect) computerModeSelect.value = settings.computerMode || 'focus';
-
-  if (workStatusText) {
-    if (settings.computerMode === 'chill') {
-      workStatusText.textContent = '☕ Chế độ ngồi chill: Capy chỉ ngồi máy tính thư thái, không đếm giờ & không mồ hôi.';
-    } else if (!settings.workFocusEnabled) {
-      workStatusText.textContent = 'Khóa làm việc đang tắt. Capy tự do đổi chế độ.';
-    } else if (isWorkSessionLocked()) {
-      const timeStr = getWorkRemainingTimeString();
-      workStatusText.textContent = `💻 Đang trong giờ làm việc (Còn ${timeStr}).`;
-    } else {
-      const durText = (settings.workDurationSec < 60)
-        ? `${settings.workDurationSec} giây (Test)`
-        : (settings.workDurationSec < 3600)
-          ? `${Math.round(settings.workDurationSec / 60)} phút`
-          : `${Math.round(settings.workDurationSec / 3600)} tiếng`;
-      workStatusText.textContent = `🌱 Đã sẵn sàng. Thời gian làm việc ${durText}.`;
+  if (isOrangeModeEnabled) {
+    if (typeof scheduleNextOrangeThrow === 'function') scheduleNextOrangeThrow(5000);
+  } else {
+    if (nextOrangeThrowTimer) {
+      clearTimeout(nextOrangeThrowTimer);
+      nextOrangeThrowTimer = null;
     }
-  }
-}
-syncSettingsToUI();
 
-// Khi nhấn "Làm việc"
-function triggerWork() {
-  if (
-    capy.state === CapyState.WORKING ||
-    capy.state === CapyState.PUSHING_DESK ||
-    capy.state === CapyState.FETCHING_DESK
-  ) return;
-
-  updateDashboardUI('work');
-  tub.visible = false; // Ẩn bồn tắm nếu có
-  retractTarget = null;
-  retractWaitTimer = 0;
-
-  // Khởi động phiên làm việc tập trung
-  if (settings.workFocusEnabled && !workSessionActive) {
-    workSessionActive = true;
-    workSessionStartTime = Date.now();
-  }
-
-  const targetX = Math.max(120, canvas.width - 155);
-  desk.targetX = targetX;
-
-  // Nếu bàn đã ở vị trí sẵn: Capy chỉ việc chạy tới ngồi vào bàn
-  if (desk.visible && Math.abs(desk.x - targetX) < 10) {
-    capy.state = CapyState.WORKING;
-    capy.x = desk.x;
-    capy.y = groundY;
-    if (settings.computerMode === 'chill') {
-      showSpeechBubble(Messages.workChill, 3500, false);
-    } else {
-      const durText = (settings.workDurationSec < 60)
-        ? `${settings.workDurationSec} giây (Test)`
-        : (settings.workDurationSec < 3600)
-          ? `${Math.round(settings.workDurationSec / 60)} phút`
-          : `${Math.round(settings.workDurationSec / 3600)} tiếng`;
-      showSpeechBubble(Messages.workStart(durText), 3500, false);
-    }
-    return;
-  }
-
-  // Đặt bàn ngoài mép phải màn hình
-  desk.visible = true;
-  desk.x = canvas.width + 10;
-  desk.y = groundY - DESK_H;
-
-  // Capybara KHÔNG teleport ra ngoài mép phải!
-  // Capybara quay sang phải và đi nhanh về phía bên phải để đón và đẩy bàn ra ngoài màn hình vào
-  capy.facing = 1;
-  capy.y = groundY;
-  capy.vy = 0;
-  capy.state = CapyState.FETCHING_DESK;
-  showSpeechBubble(Messages.fetchDesk, 3500, false);
-}
-
-// Khi nhấn "Đi tắm"
-function triggerBath() {
-  // KHÓA LÀM VIỆC TẬP TRUNG: Nếu đang trong phiên làm việc thì không cho đi tắm
-  if (isWorkSessionLocked()) {
-    const timeStr = getWorkRemainingTimeString();
-    showSpeechBubble(Messages.workRemainingWarning(timeStr), 3200, true);
-    return;
-  }
-
-  if (
-    capy.state === CapyState.BATHING ||
-    capy.state === CapyState.PUSHING_TUB ||
-    capy.state === CapyState.FETCHING_TUB
-  ) return;
-
-  updateDashboardUI('bath');
-  desk.visible = false; // Ẩn bàn làm việc nếu có
-  retractTarget = null;
-  retractWaitTimer = 0;
-
-  const targetX = Math.max(120, canvas.width - 145);
-  tub.targetX = targetX;
-
-  // Nếu bồn tắm đã ở vị trí sẵn: Capy nhảy vào ngâm bồn
-  if (tub.visible && Math.abs(tub.x - targetX) < 10) {
-    capy.state = CapyState.BATHING;
-    capy.facing = -1;
-    capy.x = tub.x + tub.width / 2;
-    capy.y = groundY;
+    // Tắt mode xếp cam: Đảm bảo Capy luôn giữ lại đúng 1 quả cam (trên đầu hoặc dưới sàn)
     if (orange.state === 'ON_HEAD') {
-      dropOrange(-1, -3.2);
-      orange.x = tub.x - 14;
-      orange.y = tub.y + 15;
+      // Nếu đang xếp nhiều quả trên đầu: chỉ giữ lại 1 quả
+      if (typeof capyOrangeCount !== 'undefined') {
+        capyOrangeCount = 1;
+      }
+      // Dọn các quả ném phụ thừa trên sàn
+      if (typeof groundOranges !== 'undefined') {
+        groundOranges.length = 0;
+      }
+    } else if (orange.state === 'ON_GROUND' || orange.state === 'FALLING') {
+      // Quả chính đang ở dưới sàn / đang rơi: GIỮ NGUYÊN quả chính để người dùng nhặt lại!
+      if (typeof groundOranges !== 'undefined') {
+        groundOranges.length = 0;
+      }
+    } else {
+      // orange.state === 'NONE': nếu trên sàn đang có quả cam ném nào, giữ lại 1 quả làm quả chính
+      if (typeof groundOranges !== 'undefined' && groundOranges.length > 0) {
+        const kept = groundOranges[0];
+        orange.x = kept.x;
+        orange.y = groundY - orange.height;
+        orange.vx = 0;
+        orange.vy = 0;
+        orange.state = 'ON_GROUND';
+        orange.rotation = 0;
+        groundOranges.length = 0;
+      }
     }
-    return;
   }
-
-  // Đặt xô ngoài mép phải màn hình
-  tub.visible = true;
-  tub.x = canvas.width + 10;
-  tub.y = groundY - tub.height;
-
-  // Capybara KHÔNG teleport ra ngoài mép phải!
-  // Capybara quay sang phải và đi nhanh về phía bên phải để đón và đẩy xô ra
-  capy.facing = 1;
-  capy.y = groundY;
-  capy.vy = 0;
-  capy.state = CapyState.FETCHING_TUB;
-  showSpeechBubble(Messages.fetchTub, 3500, false);
 }
 
-// Khi nhấn "Đi dạo"
-function triggerRoam() {
-  // KHÓA LÀM VIỆC TẬP TRUNG: Nếu đang trong phiên làm việc thì không cho đi dạo
-  if (isWorkSessionLocked()) {
-    const timeStr = getWorkRemainingTimeString();
-    showSpeechBubble(Messages.workRemainingWarning(timeStr), 3200, true);
-    return;
-  }
+// HÀM BẬT/TẮT MODE GỖ (dùng chung cho dashboard + IPC từ Panel)
+function setWoodMode(enabled) {
+  isWoodModeEnabled = !!enabled;
+  settings.woodModeEnabled = isWoodModeEnabled;
+  try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); } catch (e) {}
 
-  clearSpeechBubble();
-  updateDashboardUI('roam');
-
-  if (capy.state === CapyState.WORKING || (desk.visible && desk.x < canvas.width)) {
-    // Đứng tại chỗ hiện tại, hiện message rồi cất bàn đi
-    capy.state = CapyState.IDLE_RIGHT;
-    capy.facing = 1;
-    capy.y = groundY;
-    retractWaitTimer = 110;
-    retractTarget = 'desk';
-  } else if (capy.state === CapyState.BATHING || (tub.visible && tub.x < canvas.width)) {
-    // Đứng tại chỗ hiện tại, nói "nóng vãi chưởng ra thôi" rồi cất xô đi
-    capy.state = CapyState.IDLE_RIGHT;
-    capy.facing = 1;
-    capy.y = groundY;
-    showSpeechBubble(Messages.bathTooHot, 3200, false);
-    retractWaitTimer = 110;
-    retractTarget = 'tub';
-    if (orange.state !== 'ON_HEAD') {
-      orange.state = 'RETURNING';
-    }
-  } else if (capy.state === CapyState.DIZZY || capy.state === CapyState.SLEEPING) {
-    capy.state = CapyState.WALK_LEFT;
-    capy.facing = -1;
-    capy.y = groundY;
+  if (isWoodModeEnabled) {
+    if (typeof scheduleNextWoodLog === 'function') scheduleNextWoodLog();
   } else {
-    desk.visible = false;
-    tub.visible = false;
-    retractTarget = null;
-    retractWaitTimer = 0;
-    capy.state = CapyState.WALK_LEFT;
-    capy.facing = -1;
-    capy.y = groundY;
-  }
-}
-
-// Kéo thả thanh Dashboard (Tabboard) & Ngăn kích hoạt click nhầm khi kéo
-let hasMovedDash = false;
-let preventBtnClick = false;
-let dashDragStartX = 0;
-let dashDragStartY = 0;
-let dashElemStartX = 0;
-let dashElemStartY = 0;
-
-btnWork.addEventListener('click', (e) => {
-  e.stopPropagation();
-  if (preventBtnClick) return;
-  triggerWork();
-});
-btnBath.addEventListener('click', (e) => {
-  e.stopPropagation();
-  if (preventBtnClick) return;
-  triggerBath();
-});
-btnRoam.addEventListener('click', (e) => {
-  e.stopPropagation();
-  if (preventBtnClick) return;
-  triggerRoam();
-});
-if (btnHide) {
-  btnHide.addEventListener('click', (e) => {
-    e.stopPropagation();
-    if (preventBtnClick) return;
-    triggerHide();
-  });
-}
-
-// Khi nhấn "Trốn"
-function triggerHide() {
-  if (isWorkSessionLocked()) {
-    const timeStr = getWorkRemainingTimeString();
-    showSpeechBubble(Messages.workRemainingWarning(timeStr), 3200, true);
-    return;
-  }
-
-  // Tắt mọi text và nhắc nhở đang có, hoãn chu kỳ nước
-  clearSpeechBubble();
-  waterReminderActive = false;
-  lastWaterReminderTime = Date.now();
-
-  updateDashboardUI('hide');
-
-  // Đang ngồi làm việc hoặc đang có bàn -> dọn bàn
-  if (capy.state === CapyState.WORKING || (desk.visible && desk.x < canvas.width)) {
-    desk.visible = false;
-    retractTarget = null;
-    retractWaitTimer = 0;
-  }
-  // Đang ngồi tắm hoặc đang có bồn -> dọn bồn
-  if (capy.state === CapyState.BATHING || (tub.visible && tub.x < canvas.width)) {
-    tub.visible = false;
-    retractTarget = null;
-    retractWaitTimer = 0;
-  }
-
-  capy.state = CapyState.HIDING_RUN;
-  capy.facing = 1;
-  capy.vy = 0;
-  capy.y = groundY;
-  capy.walkPhase = 0;
-}
-
-// Thu nhỏ / Mở rộng thanh Dashboard (Tabboard)
-let isDashCollapsed = false;
-try {
-  isDashCollapsed = localStorage.getItem('capy_dash_collapsed') === '1';
-} catch (e) {}
-
-function setDashboardCollapsed(collapsed) {
-  isDashCollapsed = collapsed;
-  const dashContainer = document.getElementById('dashboard');
-  if (!dashContainer) return;
-  if (isDashCollapsed) {
-    dashContainer.classList.add('collapsed');
-    if (btnToggleDash) {
-      btnToggleDash.innerHTML = '<span class="icon">🐾</span>';
-      btnToggleDash.title = 'Mở rộng thanh công cụ';
-    }
-  } else {
-    dashContainer.classList.remove('collapsed');
-    if (btnToggleDash) {
-      btnToggleDash.innerHTML = '<span class="icon">🤏</span>';
-      btnToggleDash.title = 'Thu nhỏ thanh công cụ';
+    if (typeof woodLog !== 'undefined') {
+      if (woodLog.nextSpawnTimer) {
+        clearTimeout(woodLog.nextSpawnTimer);
+        woodLog.nextSpawnTimer = null;
+      }
+      // Tắt mode khúc gỗ: Biến mất lập tức khúc gỗ thừa trên sàn/màn hình
+      woodLog.active = false;
+      woodLog.state = 'NONE';
+      woodLog.x = -999;
+      woodLog.y = -999;
     }
   }
+}
+// Stats tracking cho Control Panel
+var capyStats = {
+  workMinutesToday: 0,
+  waterCount: 0,
+  moodPercent: 75,
+  workStartedAt: null
+};
+
+// updateDashboardUI đã tách sang js/ui/dashboard.js
+
+
+// Gửi state cho Control Panel qua IPC
+function sendStateToPanel() {
   try {
-    localStorage.setItem('capy_dash_collapsed', isDashCollapsed ? '1' : '0');
+    const { ipcRenderer } = require('electron');
+    // Cập nhật work minutes
+    if (capyStats.workStartedAt && (capy.state === CapyState.WORKING)) {
+      capyStats.workMinutesToday = Math.floor((Date.now() - capyStats.workStartedAt) / 60000);
+    }
+    ipcRenderer.send('state-for-panel', {
+      orangeMode: isOrangeModeEnabled,
+      woodMode: isWoodModeEnabled,
+      workMinutesToday: capyStats.workMinutesToday,
+      waterCount: capyStats.waterCount,
+      moodPercent: capyStats.moodPercent,
+      energy: (typeof feedingSystem !== 'undefined' ? Math.round(feedingSystem.energy) : 100),
+      settings: {
+        workDuration: String(settings.workDurationSec || 3600),
+        computerMode: settings.computerMode || 'focus',
+        workFocusLock: !!settings.workFocusEnabled,
+        waterInterval: String(settings.waterIntervalSec || 3600),
+        walkSpeed: String(settings.walkSpeed || 1.55),
+        energyDuration: String(settings.energyDurationSec || 7200)
+      }
+    });
   } catch (e) {}
 }
+window.sendStateToPanel = sendStateToPanel;
 
-if (btnToggleDash) {
-  btnToggleDash.addEventListener('click', (e) => {
-    e.stopPropagation();
-    if (preventBtnClick) return;
-    setDashboardCollapsed(!isDashCollapsed);
-  });
-}
-// Khôi phục trạng thái thu nhỏ ban đầu
-setDashboardCollapsed(isDashCollapsed);
-
-// Định vị Modal Cài đặt thông minh bám theo vị trí của Dashboard
-function repositionSettingsModal() {
-  if (!settingsModalEl || !dashEl) return;
-  const dashRect = dashEl.getBoundingClientRect();
-  const modalW = settingsModalEl.offsetWidth || 295;
-  const modalH = settingsModalEl.offsetHeight || 370;
-
-  // Nếu dashboard nằm ở nửa phải màn hình, mở modal sang bên trái dashboard
-  let modalLeft = (dashRect.left > window.innerWidth / 2)
-    ? (dashRect.left - modalW - 14)
-    : (dashRect.right + 14);
-
-  // Giới hạn trong khung nhìn màn hình
-  modalLeft = Math.max(10, Math.min(window.innerWidth - modalW - 10, modalLeft));
-
-  let modalTop = dashRect.top - 20;
-  modalTop = Math.max(10, Math.min(window.innerHeight - modalH - 10, modalTop));
-
-  settingsModalEl.style.left = `${modalLeft}px`;
-  settingsModalEl.style.top = `${modalTop}px`;
-  settingsModalEl.style.right = 'auto';
-  settingsModalEl.style.bottom = 'auto';
-}
-
-// Khôi phục vị trí Dashboard đã lưu
-const DASH_POS_KEY = 'capy_dash_position_v1';
-const dashEl = document.getElementById('dashboard');
-
-function restoreDashboardPosition() {
-  if (!dashEl) return;
+// Nhận lệnh IPC từ Control Panel
+(function setupPanelIPC() {
   try {
-    const saved = localStorage.getItem(DASH_POS_KEY);
-    if (saved) {
-      const pos = JSON.parse(saved);
-      if (typeof pos.x === 'number' && typeof pos.y === 'number') {
-        const clampedX = Math.max(5, Math.min(window.innerWidth - 60, pos.x));
-        const clampedY = Math.max(5, Math.min(window.innerHeight - 150, pos.y));
-        dashEl.style.left = `${clampedX}px`;
-        dashEl.style.top = `${clampedY}px`;
-        dashEl.style.right = 'auto';
-        dashEl.style.bottom = 'auto';
-      }
-    }
-  } catch (err) {
-    console.warn('Lỗi khôi phục vị trí dashboard:', err);
-  }
-}
-restoreDashboardPosition();
-window.addEventListener('resize', restoreDashboardPosition);
+    const { ipcRenderer } = require('electron');
 
-if (dashEl) {
-  // Nhấn giữ bất kỳ đâu trên thân Tabboard để bắt đầu kéo
-  dashEl.addEventListener('mousedown', (e) => {
-    if (e.button !== 0) return;
-    dashDragCandidate = true;
-    hasMovedDash = false;
-    dashDragStartX = e.clientX;
-    dashDragStartY = e.clientY;
-    const rect = dashEl.getBoundingClientRect();
-    dashElemStartX = rect.left;
-    dashElemStartY = rect.top;
-    setMouseIgnore(false);
-  });
-
-  dashEl.addEventListener('mouseenter', () => setMouseIgnore(false));
-  dashEl.addEventListener('mouseleave', (e) => {
-    if (dashDragCandidate || isDraggingDash) return;
-    const mx = e.clientX, my = e.clientY;
-    setMouseIgnore(!isOverInteractive(mx, my));
-  });
-}
-
-// Nút Cài đặt mở Modal
-if (btnSettings && settingsModalEl) {
-  btnSettings.addEventListener('click', (e) => {
-    e.stopPropagation();
-    if (preventBtnClick) return;
-    syncSettingsToUI();
-    const isHidden = settingsModalEl.classList.contains('modal-hidden');
-    if (isHidden) {
-      settingsModalEl.classList.remove('modal-hidden');
-      repositionSettingsModal();
-      setMouseIgnore(false);
-    } else {
-      settingsModalEl.classList.add('modal-hidden');
-    }
-  });
-
-  if (modalCloseBtn) {
-    modalCloseBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      settingsModalEl.classList.add('modal-hidden');
+    // Panel yêu cầu state
+    ipcRenderer.on('request-state-for-panel', () => {
+      sendStateToPanel();
     });
-  }
 
-  // Nút Hủy / Dừng làm việc ngay trong Settings
-  if (btnCancelWork) {
-    btnCancelWork.addEventListener('click', (e) => {
-      e.stopPropagation();
-      if (workSessionActive || capy.state === CapyState.WORKING || capy.state === CapyState.PUSHING_DESK || capy.state === CapyState.FETCHING_DESK || desk.visible) {
-        workSessionActive = false;
-        updateDashboardUI('roam');
-        capy.state = CapyState.IDLE_RIGHT;
-        capy.facing = 1;
-        capy.y = groundY;
-        showSpeechBubble(Messages.workEscape, 3500, false);
-        retractWaitTimer = 110;
-        retractTarget = 'desk';
-        settingsModalEl.classList.add('modal-hidden');
-      } else {
-        showSpeechBubble(Messages.workNoSession, 2500, false);
+    // Panel toggle Orange mode
+    ipcRenderer.on('panel-toggle-orange', (event, isOn) => {
+      setOrangeMode(isOn);
+    });
+
+    // Panel toggle Wood mode
+    ipcRenderer.on('panel-toggle-wood', (event, isOn) => {
+      setWoodMode(isOn);
+    });
+
+    // Panel trigger Hide
+    ipcRenderer.on('panel-trigger-hide', () => {
+      triggerHide();
+    });
+
+    // Panel test hungry / runaway
+    ipcRenderer.on('panel-test-hungry', () => {
+      if (typeof feedingSystem !== 'undefined') {
+        if (feedingSystem.energy > 30) {
+          feedingSystem.energy = 30; // Test đói 30%
+        } else {
+          feedingSystem.energy = 0;  // Test cạn kiệt 0% bỏ đi
+        }
+        if (typeof updateEnergyUI === 'function') updateEnergyUI();
       }
     });
-  }
 
-  if (btnSaveSettings) {
-    btnSaveSettings.addEventListener('click', (e) => {
-      e.stopPropagation();
-      settings.workFocusEnabled = !!workFocusToggle.checked;
-      if (workDurationSelect) {
-        settings.workDurationSec = parseInt(workDurationSelect.value, 10) || 3600;
+    // Panel trigger water reminder
+    ipcRenderer.on('panel-trigger-water', () => {
+      if (typeof startWaterReminder === 'function') {
+        startWaterReminder();
       }
-      settings.waterIntervalSec = parseInt(waterIntervalSelect.value, 10) || 3600;
-      if (walkSpeedSelect) {
-        settings.walkSpeed = parseFloat(walkSpeedSelect.value) || 0.55;
+    });
+
+    // Panel save settings
+    ipcRenderer.on('panel-save-settings', (event, s) => {
+      if (s.workDuration) settings.workDurationSec = parseInt(s.workDuration, 10) || 3600;
+      if (s.computerMode) settings.computerMode = s.computerMode;
+      if (s.workFocusLock !== undefined) settings.workFocusEnabled = s.workFocusLock;
+      if (s.waterInterval) settings.waterIntervalSec = parseInt(s.waterInterval, 10) || 3600;
+      if (s.walkSpeed) {
+        settings.walkSpeed = parseFloat(s.walkSpeed) || 1.55;
         capy.speed = settings.walkSpeed;
       }
-      if (computerModeSelect) {
-        settings.computerMode = computerModeSelect.value;
+      if (s.energyDuration !== undefined) {
+        settings.energyDurationSec = parseInt(s.energyDuration, 10) || 7200;
       }
-
       // Lưu trữ
       try {
         localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
-      } catch (err) {
-        console.warn('Lỗi lưu cài đặt:', err);
-      }
-
-      // Reset đồng hồ nước để chu kỳ mới được áp dụng ngay
+      } catch (err) {}
+      // Reset đồng hồ nước
       lastWaterReminderTime = Date.now();
       waterReminderActive = false;
-
-      // Cập nhật trạng thái
-      syncSettingsToUI();
-      settingsModalEl.classList.add('modal-hidden');
-
-      const durText = (settings.workDurationSec < 60)
-        ? `${settings.workDurationSec}s (Test)`
-        : (settings.workDurationSec < 3600)
-          ? `${Math.round(settings.workDurationSec / 60)} phút`
-          : `${Math.round(settings.workDurationSec / 3600)} tiếng`;
-      const intervalText = (settings.waterIntervalSec < 60)
-        ? `${settings.waterIntervalSec}s (Test)`
-        : `${Math.round(settings.waterIntervalSec / 60)} phút`;
-
-      if (capy.state === CapyState.WORKING) {
-        if (settings.computerMode === 'chill') {
-          showSpeechBubble(Messages.settingsSavedChill, 3500, false);
-        } else {
-          workSessionStartTime = Date.now();
-          workSessionActive = true;
-          showSpeechBubble(Messages.settingsSavedWork(durText, intervalText), 3500, false);
-        }
-      } else {
-        showSpeechBubble(Messages.settingsSavedSuccess, 3000, false);
-      }
+      showSpeechBubble(Messages.settingsSavedSuccess, 3000, false);
     });
+  } catch (e) {
+    console.warn('IPC Panel setup failed:', e);
   }
+})();
 
-  // Bắt chuột trên modal để không bị click xuyên thấu
-  settingsModalEl.addEventListener('mouseenter', () => setMouseIgnore(false));
-  settingsModalEl.addEventListener('mouseleave', (e) => {
-    const mx = e.clientX, my = e.clientY;
-    setMouseIgnore(!isOverInteractive(mx, my));
-  });
-}
+// Dashboard event listeners & kéo thả đã tách sang js/ui/dashboard.js
+
+
+// (Settings modal & save logic đã chuyển sang Control Panel window)
 
 // Dựng Capy dậy khi bị ngã: đứng yên trong 3s càm ràm rồi mới đi tiếp
 function wakeCapyFromDizzy() {
@@ -1016,6 +577,7 @@ function wakeCapyFromDizzy() {
 
 // 8. SỰ KIỆN CHUỘT
 window.addEventListener('mousedown', (e) => {
+  if (capy.state === CapyState.LEAVING_RUNAWAY) return; // Đang bỏ đi không thể can thiệp
   if (e.button === 0) {
     const mx = e.clientX;
     const my = e.clientY;
@@ -1023,6 +585,16 @@ window.addEventListener('mousedown', (e) => {
     lastMouseX = e.screenX;
     lastMouseY = e.screenY;
     prevDeltaX = 0;
+
+    // A00. CLICK/KÉO THẢ KHÚC GỖ
+    if (typeof handleWoodLogMouseDown === 'function' && handleWoodLogMouseDown(mx, my)) {
+      return;
+    }
+
+    // A000. CLICK NHẤN UỐNG NƯỚC / LY NƯỚC KHỔNG LỒ
+    if (typeof handleWaterReminderMouseDown === 'function' && handleWaterReminderMouseDown(mx, my)) {
+      return;
+    }
 
     // A0. CLICK VÀO PHẦN MÔNG BỊ LỘ KHI ĐANG TRỐN
     if (capy.state === CapyState.HIDDEN) {
@@ -1052,35 +624,75 @@ window.addEventListener('mousedown', (e) => {
       }
     }
 
-    // B. CLICK QUẢ CAM DƯỚI ĐẤT -> BAY VỀ ĐẦU
+    // B. CLICK QUẢ CAM DƯỚI ĐẤT -> BAY VỀ XẾP CHỒNG LÊN ĐẦU CAPY (Cho phép nhặt bất kể mode bật/tắt)
+    let clickedGroundOrange = null;
+    const pad = 14;
+
     if (orange.state === 'ON_GROUND' || orange.state === 'FALLING') {
-      const pad = 14;
       if (
         mx >= orange.x - pad &&
         mx <= orange.x + orange.width + pad &&
         my >= orange.y - pad &&
         my <= orange.y + orange.height + pad
       ) {
-        orange.state = 'RETURNING';
-
-        // 1. Nếu đang ngồi tắm: đứng dậy nói "nóng vãi chưởng ra thôi" rồi cất xô đi dạo!
-        if (capy.state === CapyState.BATHING) {
-          triggerRoam();
-        }
-        // 2. Nếu đang ngồi máy tính: đứng dậy rời bàn đi dạo!
-        else if (capy.state === CapyState.WORKING) {
-          workSessionActive = false;
-          triggerRoam();
-          showSpeechBubble(Messages.foundOrange, 3200, false);
-        }
-        // 3. Nếu đang nằm ngủ hoặc đang ngơ ngác tìm cam: thức dậy đi dạo
-        else if (capy.state === CapyState.SLEEPING || capy.state === CapyState.LOST_ORANGE) {
-          capy.state = (capy.facing === 1) ? CapyState.WALK_RIGHT : CapyState.WALK_LEFT;
-          zzzParticles.length = 0;
-        }
-        // 4. Nếu đang đẩy xô/bàn vào hoặc đang cất đồ: GIỮ NGUYÊN để Capy hoàn thành đẩy/cất xong rồi mới đi dạo!
-        return;
+        clickedGroundOrange = orange;
       }
+    }
+
+    if (!clickedGroundOrange) {
+      for (const o of groundOranges) {
+        if (o.state === 'ON_GROUND' || o.state === 'FALLING') {
+          if (
+            mx >= o.x - pad &&
+            mx <= o.x + o.width + pad &&
+            my >= o.y - pad &&
+            my <= o.y + o.height + pad
+          ) {
+            clickedGroundOrange = o;
+            break;
+          }
+        }
+      }
+    }
+
+    if (clickedGroundOrange) {
+      // Nếu đang trong chế độ làm việc tập trung (không phải chill):
+      if (
+        capy.state === CapyState.WORKING ||
+        capy.state === CapyState.FETCHING_DESK ||
+        capy.state === CapyState.PUSHING_DESK
+      ) {
+        if (settings.computerMode !== 'chill') {
+          // Vẫn tiếp tục làm việc chứ không được đi chơi, chỉ khi ngồi chill mới nhặt được!
+          if (typeof isWorkSessionLocked === 'function' && isWorkSessionLocked()) {
+            const timeStr = getWorkRemainingTimeString();
+            showSpeechBubble(Messages.workRemainingWarning(timeStr), 3200, true);
+          } else {
+            showSpeechBubble('Đang tập trung làm việc mà! Làm xong rồi mới đi chơi nhé 💼✨', 3000, true);
+          }
+          return;
+        }
+      }
+
+      clickedGroundOrange.state = 'RETURNING';
+
+      // 1. Nếu đang ngồi tắm: đứng dậy nói "nóng vãi chưởng ra thôi" rồi cất xô đi dạo!
+      if (capy.state === CapyState.BATHING) {
+        triggerRoam();
+      }
+      // 2. Nếu đang ngồi máy tính chill: đứng dậy rời bàn đi dạo!
+      else if (capy.state === CapyState.WORKING) {
+        workSessionActive = false;
+        triggerRoam();
+        showSpeechBubble(Messages.foundOrange, 3200, false);
+      }
+      // 3. Nếu đang nằm ngủ hoặc đang ngơ ngác tìm cam: thức dậy đi dạo
+      else if (capy.state === CapyState.SLEEPING || capy.state === CapyState.LOST_ORANGE) {
+        capy.state = (capy.facing === 1) ? CapyState.WALK_RIGHT : CapyState.WALK_LEFT;
+        zzzParticles.length = 0;
+      }
+      // 4. Nếu đang đẩy xô/bàn vào hoặc đang cất đồ: GIỮ NGUYÊN để Capy hoàn thành đẩy/cất xong rồi mới đi dạo!
+      return;
     }
 
     // B1. CLICK VÀO QUẢ CAM TRÊN ĐẦU CAPYBARA -> LÀM RỚT CAM XUỐNG ĐẤT
@@ -1099,38 +711,7 @@ window.addEventListener('mousedown', (e) => {
       }
     }
 
-    // B2. XÁC NHẬN ĐÃ UỐNG NƯỚC KHI CLICK VÀO CAPYBARA HOẶC BÀN / XÔ / CHAI NƯỚC
-    const bottleW = 14, bottleH = 31;
-    let isClickBottle = false;
 
-    if (capy.state === CapyState.WORKING && desk.visible) {
-      const bx = desk.x + 53, by = groundY - 44;
-      isClickBottle = (mx >= bx - 8 && mx <= bx + bottleW + 8 && my >= by - bottleH - 8 && my <= by + 8);
-    } else if (tub.visible) {
-      const bx = tub.x - 22, by = groundY - 3;
-      isClickBottle = (mx >= bx - 8 && mx <= bx + bottleW + 8 && my >= by - bottleH - 8 && my <= by + 8);
-    } else {
-      const bx = (capy.facing === 1) ? (capy.x + 28) : (capy.x - 28 - bottleW);
-      const by = groundY - 3;
-      isClickBottle = (mx >= bx - 8 && mx <= bx + bottleW + 8 && my >= by - bottleH - 8 && my <= by + 8);
-    }
-
-    const isNearWaterTarget = isClickBottle || (
-      (mx >= capy.x - 45 && mx <= capy.x + 45 && my >= capy.y - 70 && my <= capy.y + 15) ||
-      (desk.visible && mx >= desk.x - 10 && mx <= desk.x + desk.width + 10 && my >= groundY - WORK_H - 15 && my <= groundY + 10) ||
-      (tub.visible && mx >= tub.x - 10 && mx <= tub.x + tub.width + 10 && my >= tub.y - 15 && my <= tub.y + tub.height + 10)
-    );
-
-    if (waterReminderActive && isNearWaterTarget) {
-      waterReminderActive = false;
-      lastWaterReminderTime = Date.now();
-      showSpeechBubble(Messages.waterDrank, 3500, false);
-      spawnWakeStars(desk.visible ? desk.x + 55 : capy.x, groundY - 35);
-      // Tiếp tục đi dạo nếu đang ở mode roam
-      if (capy.state === CapyState.IDLE_RIGHT) capy.state = CapyState.WALK_RIGHT;
-      else if (capy.state === CapyState.IDLE_LEFT) capy.state = CapyState.WALK_LEFT;
-      return;
-    }
 
     // C. KHI ĐANG TẮM TRONG CHẬU ONSEN
     if (capy.state === CapyState.BATHING && tub.visible) {
@@ -1150,17 +731,13 @@ window.addEventListener('mousedown', (e) => {
       }
     }
 
-    // D. KHI ĐANG LÀM VIỆC TẠI BÀN
+    // D. KHI ĐANG LÀM VIỆC TẠI BÀN -> KÉO BÀN VÀ CAPYBARA
     if (capy.state === CapyState.WORKING && desk.visible) {
       const isOverWork = (mx >= desk.x && mx <= desk.x + desk.width && my >= groundY - WORK_H && my <= groundY);
       if (isOverWork) {
-        if (isWorkSessionLocked()) {
-          const timeStr = getWorkRemainingTimeString();
-          showSpeechBubble(Messages.workRemainingEncourage(timeStr), 3000, false);
-          return;
-        }
-        // Nhấp vào bàn làm việc -> Capy đứng dậy đi dạo
-        triggerRoam();
+        deskClickStartX = e.screenX;
+        deskClickStartY = e.screenY;
+        isDraggingDesk = true;
         return;
       }
     }
@@ -1191,19 +768,30 @@ window.addEventListener('mousedown', (e) => {
       capy.state === CapyState.FETCHING_DESK ||
       capy.state === CapyState.FETCHING_TUB ||
       capy.state === CapyState.APPROACHING_DESK ||
-      capy.state === CapyState.APPROACHING_TUB
+      capy.state === CapyState.APPROACHING_TUB ||
+      capy.state === CapyState.FETCHING_WATER_GLASS ||
+      capy.state === CapyState.PUSHING_WATER_GLASS ||
+      capy.state === CapyState.WAITING_WATER_DRINK ||
+      capy.state === CapyState.RETRACTING_WATER_GLASS ||
+      capy.state === CapyState.RETURNING_TO_TUB ||
+      capy.state === CapyState.RETURNING_TO_DESK
     );
 
-    if (isClickCapy && capy.state !== CapyState.DIZZY && !isBusyWithProps) {
+    if (isClickCapy && capy.state !== CapyState.DIZZY && capy.state !== CapyState.LEAVING_RUNAWAY && !isBusyWithProps) {
       if (isWorkSessionLocked() && capy.state === CapyState.WORKING) {
         showSpeechBubble(Messages.workDragWarning, 3000, true);
         return;
       }
       clearSpeechBubble();
       isDraggingCapy = true;
+      window.isDraggingCapy = true;
       capy.maxDragHeight = 0;
-      if (capy.state !== CapyState.LOST_ORANGE && capy.state !== CapyState.SLEEPING) {
-        capy.state = CapyState.DRAGGED;
+      capy.state = CapyState.DRAGGED;
+      capy.lostOrangeTimer = 0;
+      capy.lostNoticeTimer = 0;
+      // Nhấn giữ chuột vào Capybara là quả cam trên đầu rơi xuống ngay lập tức
+      if (orange.state === 'ON_HEAD') {
+        dropOrange(-capy.facing, -3.2);
       }
       return;
     }
@@ -1224,27 +812,8 @@ window.addEventListener('mousemove', (e) => {
   const mx = e.clientX;
   const my = e.clientY;
 
-  // XỬ LÝ KÉO THẢ THANH TABBOARD (DASHBOARD) - Xử lý ngay lập tức khi đang kéo
-  if (dashDragCandidate && dashEl) {
-    const dx = e.clientX - dashDragStartX;
-    const dy = e.clientY - dashDragStartY;
-    if (!hasMovedDash && Math.hypot(dx, dy) > 4) {
-      hasMovedDash = true;
-      isDraggingDash = true;
-      dashEl.classList.add('is-dragging');
-    }
-    if (isDraggingDash) {
-      const clampedX = Math.max(5, Math.min(window.innerWidth - dashEl.offsetWidth - 5, dashElemStartX + dx));
-      const clampedY = Math.max(5, Math.min(window.innerHeight - dashEl.offsetHeight - 5, dashElemStartY + dy));
-      dashEl.style.left = `${clampedX}px`;
-      dashEl.style.top = `${clampedY}px`;
-      dashEl.style.right = 'auto';
-      dashEl.style.bottom = 'auto';
-      repositionSettingsModal();
-      setMouseIgnore(false);
-      return;
-    }
-  }
+  if (isDraggingDash) return;
+
 
   // KÉO THẢ CAPYBARA TOÀN MÀN HÌNH - Xử lý ngay lập tức
   if (isDraggingCapy) {
@@ -1261,24 +830,46 @@ window.addEventListener('mousemove', (e) => {
       capy.maxDragHeight = currentHeight;
     }
 
-    const moveDist = Math.hypot(deltaX, deltaY);
-    const isViolentMove = moveDist > 55; // Chỉ khi vẩy chuột cực nhanh mới làm rớt cam
-    const isViolentShake = (deltaX > 20 && prevDeltaX < -20) || (deltaX < -20 && prevDeltaX > 20); // Lắc chuột qua lại mạnh
-    prevDeltaX = deltaX;
-
-    if ((isViolentMove || isViolentShake) && orange.state === 'ON_HEAD') {
-      dropOrange(Math.sign(deltaX) || 1, -3.5);
+    // Khi kéo Capy theo bất kỳ hướng nào (ngang, dọc, kéo thẳng lên trên): làm quả cam rơi ngay lập tức
+    if (orange.state === 'ON_HEAD') {
+      const dropDir = (deltaX !== 0) ? Math.sign(deltaX) : (-capy.facing);
+      dropOrange(dropDir, -3.5);
     }
+    return;
+  }
+
+  // KÉO THẢ KHÚC GỖ CHƯỚNG NGẠI VẬT - Xử lý ngay lập tức
+  if (typeof handleWoodLogMouseMove === 'function' && typeof isDraggingWoodLog !== 'undefined' && isDraggingWoodLog) {
+    canvas.style.cursor = 'grabbing';
+    const deltaX = e.screenX - lastMouseX;
+    const deltaY = e.screenY - lastMouseY;
+    lastMouseX = e.screenX;
+    lastMouseY = e.screenY;
+    handleWoodLogMouseMove(mx, my, deltaX, deltaY);
     return;
   }
 
   // KÉO THẢ BỒN TẮM ONSEN - Xử lý ngay lập tức
   if (isDraggingTub && tub.visible) {
+    canvas.style.cursor = 'grabbing';
     const deltaX = e.screenX - lastMouseX;
     lastMouseX = e.screenX;
     lastMouseY = e.screenY;
     tub.x = Math.max(10, Math.min(canvas.width - tub.width - 10, tub.x + deltaX));
     tub.y = groundY - tub.height;
+    return;
+  }
+
+  // KÉO THẢ BÀN LÀM VIỆC & CAPYBARA - Xử lý ngay lập tức
+  if (isDraggingDesk && desk.visible) {
+    canvas.style.cursor = 'grabbing';
+    const deltaX = e.screenX - lastMouseX;
+    lastMouseX = e.screenX;
+    lastMouseY = e.screenY;
+    desk.x = Math.max(10, Math.min(canvas.width - desk.width - 10, desk.x + deltaX));
+    desk.y = groundY - DESK_H;
+    capy.x = desk.x;
+    desk.targetX = desk.x;
     return;
   }
 
@@ -1293,6 +884,11 @@ window.addEventListener('mousemove', (e) => {
   const isOver = isOverInteractive(mx, my);
   setMouseIgnore(!isOver);
 
+  // Di chuột qua cổng không gian
+  if (typeof handleGateMouseMove === 'function' && handleGateMouseMove(mx, my)) {
+    return;
+  }
+
   // Đổi con trỏ chuột
   if (capy.state === CapyState.DIZZY) {
     const halfW = FALLEN_W / 2 + 10;
@@ -1302,15 +898,9 @@ window.addEventListener('mousemove', (e) => {
     }
   }
 
-  if (desk.visible) {
-    if (mx >= desk.x && mx <= desk.x + desk.width && my >= groundY - WORK_H && my <= groundY) {
-      canvas.style.cursor = 'pointer';
-      return;
-    }
-  }
-
+  // 1. Quả cam dưới đất hoặc trên đầu
+  const pad = 10;
   if (orange.state === 'ON_GROUND' || (orange.state === 'ON_HEAD' && capy.state !== CapyState.WORKING)) {
-    const pad = 8;
     if (
       mx >= orange.x - pad &&
       mx <= orange.x + orange.width + pad &&
@@ -1322,11 +912,38 @@ window.addEventListener('mousemove', (e) => {
     }
   }
 
+  for (const o of groundOranges) {
+    if (o.state === 'ON_GROUND' || o.state === 'FALLING') {
+      if (
+        mx >= o.x - pad &&
+        mx <= o.x + o.width + pad &&
+        my >= o.y - pad &&
+        my <= o.y + o.height + pad
+      ) {
+        canvas.style.cursor = 'pointer';
+        return;
+      }
+    }
+  }
+
+  // 1.5. Khúc gỗ chướng ngại vật
+  if (typeof isOverWoodLog === 'function' && isOverWoodLog(mx, my)) {
+    canvas.style.cursor = 'pointer';
+    return;
+  }
+
+  // 1.6. Ly nước khổng lồ / Nút bấm Uống nước
+  if (typeof handleWaterReminderMouseMove === 'function' && handleWaterReminderMouseMove(mx, my)) {
+    return;
+  }
+
+  // 2. Chậu tắm Onsen, Bàn làm việc, hoặc Capybara -> grab
   const isNearTub = tub.visible && (mx >= tub.x && mx <= tub.x + tub.width && my >= tub.y && my <= tub.y + tub.height);
+  const isNearDesk = desk.visible && (mx >= desk.x && mx <= desk.x + desk.width && my >= groundY - WORK_H && my <= groundY);
   const capyHalfW = RENDER_W / 2 + 8;
   const isNearCapy = (mx >= capy.x - capyHalfW && mx <= capy.x + capyHalfW && my >= capy.y - RENDER_H && my <= capy.y + 10);
 
-  if (isNearTub || isNearCapy) {
+  if (isNearTub || isNearDesk || isNearCapy) {
     canvas.style.cursor = 'grab';
   } else {
     canvas.style.cursor = 'default';
@@ -1335,22 +952,13 @@ window.addEventListener('mousemove', (e) => {
 
 window.addEventListener('mouseup', (e) => {
   if (e.button === 0) {
-    // THẢ THANH TABBOARD (DASHBOARD)
-    if (dashDragCandidate || isDraggingDash) {
-      if (hasMovedDash && dashEl) {
-        preventBtnClick = true;
-        setTimeout(() => { preventBtnClick = false; }, 150);
-        const rect = dashEl.getBoundingClientRect();
-        try {
-          localStorage.setItem(DASH_POS_KEY, JSON.stringify({ x: rect.left, y: rect.top }));
-        } catch (err) {}
-      }
-      dashDragCandidate = false;
-      isDraggingDash = false;
-      if (dashEl) dashEl.classList.remove('is-dragging');
+    if (typeof handleWoodLogMouseUp === 'function') {
+      handleWoodLogMouseUp();
     }
+
     if (isDraggingCapy) {
       isDraggingCapy = false;
+      window.isDraggingCapy = false;
 
       // 1. Kiểm tra thả vào chậu tắm Onsen
       const isOverTub = tub.visible && (
@@ -1380,6 +988,7 @@ window.addEventListener('mouseup', (e) => {
         if (heightAboveGround > threshold) {
           capy.state = CapyState.FALLING;
           capy.vy = 2.0;
+          capy.fallStartY = capy.y;
           capy.fallingFromHigh = true;
 
           if (orange.state === 'ON_HEAD') {
@@ -1388,6 +997,7 @@ window.addEventListener('mouseup', (e) => {
         } else if (heightAboveGround > 15) {
           capy.state = CapyState.FALLING;
           capy.vy = 1.0;
+          capy.fallStartY = capy.y;
           capy.fallingFromHigh = false;
           capy.droppedFromLow = true; // Kéo lên cao nhưng chưa qua 30%
         } else {
@@ -1415,6 +1025,24 @@ window.addEventListener('mouseup', (e) => {
       tub.y = groundY - tub.height;
     }
 
+    if (isDraggingDesk) {
+      isDraggingDesk = false;
+      desk.y = groundY - DESK_H;
+      // Nếu chỉ click nhẹ vào bàn/Capy mà không kéo:
+      const dragDist = Math.hypot(e.screenX - deskClickStartX, e.screenY - deskClickStartY);
+      if (dragDist < 5 && capy.state === CapyState.WORKING) {
+        if (isWorkSessionLocked()) {
+          const timeStr = getWorkRemainingTimeString();
+          showSpeechBubble(Messages.workRemainingEncourage(timeStr), 3000, false);
+        } else if (settings.computerMode === 'chill') {
+          showSpeechBubble(Messages.workChill, 3000, false);
+        } else if (Messages.workQuotes && Messages.workQuotes.length > 0) {
+          const quote = Messages.workQuotes[Math.floor(Math.random() * Messages.workQuotes.length)];
+          showSpeechBubble(quote, 3000, false);
+        }
+      }
+    }
+
     const mx = e.clientX;
     const my = e.clientY;
     setMouseIgnore(!isOverInteractive(mx, my));
@@ -1422,8 +1050,25 @@ window.addEventListener('mouseup', (e) => {
 });
 
 window.addEventListener('mouseleave', () => {
-  if (!isDraggingCapy && !isDraggingTub) {
+  if (!isDraggingCapy && !isDraggingTub && !isDraggingDesk) {
     setMouseIgnore(true);
+  }
+});
+
+window.addEventListener('blur', () => {
+  if (isDraggingCapy) {
+    isDraggingCapy = false;
+    window.isDraggingCapy = false;
+    if (capy.state === CapyState.DRAGGED) {
+      if (capy.y >= groundY - 15) {
+        capy.y = groundY;
+        capy.state = (capy.facing === 1) ? CapyState.WALK_RIGHT : CapyState.WALK_LEFT;
+      } else {
+        capy.state = CapyState.FALLING;
+        capy.vy = 1.0;
+        capy.fallStartY = capy.y;
+      }
+    }
   }
 });
 
@@ -1441,450 +1086,18 @@ ipcRenderer.on('reset-capy-position', () => {
   updateDashboardUI('roam');
 });
 
-// 9. VẬT LÝ QUẢ CAM
-function updateOrange() {
-  const floorY = groundY - orange.height;
-
-  if (orange.state === 'ON_HEAD') {
-    if (capy.state !== CapyState.WORKING) {
-      const isWalking = (
-        capy.state === CapyState.WALK_RIGHT ||
-        capy.state === CapyState.WALK_LEFT ||
-        capy.state === CapyState.FETCHING_DESK ||
-        capy.state === CapyState.FETCHING_TUB ||
-        capy.state === CapyState.APPROACHING_DESK ||
-        capy.state === CapyState.APPROACHING_TUB
-      );
-      const bodyYOffset = isWalking ? Math.sin(capy.walkPhase * 2) * 1.5 : Math.sin(capy.breathPhase) * 1.2;
-      const orangeBounce = isWalking ? Math.cos(capy.walkPhase * 2) * 1 : 0;
-      const headX = (capy.facing === 1 ? capy.x + 3 : capy.x - 3);
-      const headY = capy.y - RENDER_H + bodyYOffset + orangeBounce - 7;
-      orange.x = headX - orange.width / 2;
-      orange.y = headY;
-    }
-  } else if (orange.state === 'FALLING') {
-    orange.x += orange.vx;
-    orange.y += orange.vy;
-    orange.vy += 0.38;
-    orange.vx *= 0.98;
-    orange.rotation += orange.rotSpeed;
-
-    if (orange.y >= floorY) {
-      orange.y = floorY;
-      orange.vy = -orange.vy * 0.42;
-      orange.rotSpeed *= 0.6;
-      orange.bounceCount++;
-
-      if (Math.abs(orange.vy) < 0.6 || orange.bounceCount >= 3) {
-        orange.state = 'ON_GROUND';
-        orange.y = floorY;
-        orange.vx = 0;
-        orange.vy = 0;
-        orange.rotSpeed = 0;
-        orange.rotation = 0;
-      }
-    }
-
-    if (orange.x <= 8) {
-      orange.x = 8;
-      orange.vx = -orange.vx * 0.5;
-    } else if (orange.x >= canvas.width - orange.width - 8) {
-      orange.x = canvas.width - orange.width - 8;
-      orange.vx = -orange.vx * 0.5;
-    }
-  } else if (orange.state === 'RETURNING') {
-    const isWalking = (
-      capy.state === CapyState.WALK_RIGHT ||
-      capy.state === CapyState.WALK_LEFT ||
-      capy.state === CapyState.FETCHING_DESK ||
-      capy.state === CapyState.FETCHING_TUB ||
-      capy.state === CapyState.APPROACHING_DESK ||
-      capy.state === CapyState.APPROACHING_TUB
-    );
-    const bodyYOffset = isWalking ? Math.sin(capy.walkPhase * 2) * 1.5 : Math.sin(capy.breathPhase) * 1.2;
-    const targetX = (capy.facing === 1 ? capy.x + 3 : capy.x - 3) - orange.width / 2;
-    const targetY = capy.y - RENDER_H + bodyYOffset - 7;
-
-    orange.x += (targetX - orange.x) * 0.22;
-    orange.y += (targetY - orange.y) * 0.22;
-    orange.rotation *= 0.75;
-
-    if (Math.hypot(targetX - orange.x, targetY - orange.y) < 3.5) {
-      orange.state = 'ON_HEAD';
-      orange.rotation = 0;
-      // Chỉ chuyển sang đi dạo nếu Capy đang ở trạng thái ngơ ngác mất cam hoặc đang ngủ
-      if (capy.state === CapyState.LOST_ORANGE || capy.state === CapyState.SLEEPING) {
-        capy.state = (capy.facing === 1) ? CapyState.WALK_RIGHT : CapyState.WALK_LEFT;
-      }
-      capy.lostOrangeTimer = 0;
-      zzzParticles.length = 0;
-    }
+ipcRenderer.on('panel-trigger-gate', () => {
+  if (typeof triggerGate === 'function') {
+    triggerGate();
   }
-}
+});
 
-function drawOrange(c) {
-  if (!orangeImg.complete || orangeImg.naturalWidth === 0) return;
+ipcRenderer.on('screen-switched', () => {
+  resizeCanvas();
+});
 
-  const isWalking = (
-    capy.state === CapyState.WALK_RIGHT ||
-    capy.state === CapyState.WALK_LEFT ||
-    capy.state === CapyState.FETCHING_DESK ||
-    capy.state === CapyState.FETCHING_TUB ||
-    capy.state === CapyState.APPROACHING_DESK ||
-    capy.state === CapyState.APPROACHING_TUB
-  );
-  const bodyYOffset = isWalking ? Math.sin(capy.walkPhase * 2) * 1.5 : Math.sin(capy.breathPhase) * 1.2;
-  const orangeBounce = isWalking ? Math.cos(capy.walkPhase * 2) * 1 : 0;
+// 13. HIỂN THỊ LỜI NÓI (Đã tách sang js/ui/speech-bubble.js)
 
-  c.save();
-  c.imageSmoothingEnabled = false;
-
-  if (orange.state === 'ON_HEAD') {
-    if (capy.state === CapyState.WORKING) {
-      // Khi đang làm việc, laptop đã có logo quả cam nên không vẽ cam trên đầu
-      c.restore();
-      return;
-    }
-    const headX = (capy.facing === 1 ? capy.x + 3 : capy.x - 3);
-    const headY = capy.y - RENDER_H + bodyYOffset + orangeBounce - 7;
-
-    orange.x = headX - orange.width / 2;
-    orange.y = headY;
-
-    const tilt = isWalking ? Math.sin(capy.walkPhase) * 0.08 : 0;
-    c.translate(headX, headY + orange.height / 2);
-    c.rotate(tilt);
-    c.drawImage(orangeImg, -orange.width / 2, -orange.height / 2, orange.width, orange.height);
-  } else {
-    const distToGround = Math.max(0, groundY - (orange.y + orange.height));
-    const shadowAlpha = Math.max(0.08, 0.25 - distToGround * 0.003);
-    const shadowScale = Math.max(0.4, 1 - distToGround * 0.015);
-
-    c.fillStyle = `rgba(20, 20, 30, ${shadowAlpha})`;
-    c.beginPath();
-    c.ellipse(orange.x + orange.width / 2, groundY, 7 * shadowScale, 2.5 * shadowScale, 0, 0, Math.PI * 2);
-    c.fill();
-
-    c.translate(orange.x + orange.width / 2, orange.y + orange.height / 2);
-    c.rotate(orange.rotation);
-    c.drawImage(orangeImg, -orange.width / 2, -orange.height / 2, orange.width, orange.height);
-
-    if (orange.state === 'ON_GROUND') {
-      const pulse = Math.sin(Date.now() * 0.006) * 0.5 + 0.5;
-      c.strokeStyle = `rgba(255, 195, 30, ${0.45 * pulse})`;
-      c.lineWidth = 1.5;
-      c.beginPath();
-      c.arc(0, 0, orange.width / 2 + 3 + pulse * 2, 0, Math.PI * 2);
-      c.stroke();
-    }
-  }
-
-  c.restore();
-}
-
-// 10. VẼ BỒN TẮM ONSEN
-function drawTubAndBath(c) {
-  if (!tub.visible) return;
-
-  c.save();
-  c.imageSmoothingEnabled = false;
-
-  c.fillStyle = 'rgba(20, 20, 30, 0.28)';
-  c.beginPath();
-  c.ellipse(tub.x + tub.width / 2, groundY, tub.width * 0.44, 4.5, 0, 0, Math.PI * 2);
-  c.fill();
-
-  if (capy.state === CapyState.BATHING) {
-    if (tubBathImg.complete && tubBathImg.naturalWidth > 0) {
-      c.drawImage(tubBathImg, tub.x, tub.y, tub.width, tub.height);
-
-      const cheekPulse = 0.4 + Math.sin(Date.now() * 0.004) * 0.12;
-      c.fillStyle = `rgba(255, 115, 115, ${cheekPulse})`;
-      c.beginPath();
-      c.ellipse(tub.x + tub.width * 0.45, tub.y + tub.height * 0.28, 4.2, 2.6, 0, 0, Math.PI * 2);
-      c.fill();
-
-      // Giọt mồ hôi nhỏ cố định trên thái dương khi ngâm nước nóng Onsen (dịch sang phải để không giống khóc)
-      drawSweatDrop(c, tub.x + 39, tub.y + 14, 2.2);
-    }
-  } else {
-    if (tubImg.complete && tubImg.naturalWidth > 0) {
-      c.drawImage(tubImg, tub.x, tub.y, tub.width, tub.height);
-    }
-  }
-
-  // KHI NHẮC UỐNG NƯỚC Ở MODE TẮM: HIỆN BÊN TRÁI XÔ TẮM
-  if (waterReminderActive && bottleImg.complete && bottleImg.naturalWidth > 0) {
-    const bottleW = 14;
-    const bottleH = 30.5;
-    const bottleX = tub.x - 22; // Bên trái xô tắm
-    const bottleY = groundY - 3;
-    const bounce = Math.sin(Date.now() * 0.006) * 1.5;
-
-    // Bóng đổ nhẹ dưới đáy chai nước
-    c.fillStyle = 'rgba(10, 10, 20, 0.35)';
-    c.beginPath();
-    c.ellipse(bottleX + bottleW / 2, groundY, 6, 2, 0, 0, Math.PI * 2);
-    c.fill();
-
-    // Vẽ chai nước
-    c.drawImage(bottleImg, bottleX, bottleY - bottleH + bounce, bottleW, bottleH);
-
-    // Giọt nước nhỏ nhấp nháy phát sáng trên chai
-    const dripY = bottleY - bottleH - 5 + Math.sin(Date.now() * 0.008) * 2;
-    drawSweatDrop(c, bottleX + bottleW / 2, dripY, 1.8);
-  }
-
-  c.restore();
-}
-
-// 11. ĐỒNG HỒ CÁT LOADING TRÊN ĐẦU CAPYBARA (ĐỨNG THẲNG ĐỀU ĐẶN)
-function drawHourglass(c, cx, cy) {
-  c.save();
-  c.translate(cx, cy);
-
-  const now = Date.now();
-  const period = 2000; // 2 giây mỗi chu kỳ cát chảy
-  const t = now % period;
-
-  const hw = 5;  // Bề rộng 10px
-  const hh = 7;  // Chiều cao 14px
-
-  // Hai đầu thanh gỗ/đồng
-  c.fillStyle = '#b45309';
-  c.fillRect(-hw - 1, -hh, (hw + 1) * 2, 2);
-  c.fillRect(-hw - 1, hh - 2, (hw + 1) * 2, 2);
-
-  // Thân bóng thủy tinh
-  c.fillStyle = 'rgba(224, 242, 254, 0.45)';
-  c.strokeStyle = '#38bdf8';
-  c.lineWidth = 1;
-
-  c.beginPath();
-  c.moveTo(-hw, -hh + 2);
-  c.lineTo(hw, -hh + 2);
-  c.lineTo(1.2, 0);
-  c.lineTo(hw, hh - 2);
-  c.lineTo(-hw, hh - 2);
-  c.lineTo(-1.2, 0);
-  c.closePath();
-  c.fill();
-  c.stroke();
-
-  // Cát ở bầu trên (vơi dần)
-  const sandProgress = Math.min(1, t / 1550);
-  const topSandH = (1 - sandProgress) * 4;
-  if (topSandH > 0.4) {
-    c.fillStyle = '#fbbf24';
-    c.beginPath();
-    c.moveTo(-1 - topSandH * 0.7, -topSandH);
-    c.lineTo(1 + topSandH * 0.7, -topSandH);
-    c.lineTo(0.6, -0.2);
-    c.lineTo(-0.6, -0.2);
-    c.closePath();
-    c.fill();
-  }
-
-  // Tia cát rơi ở eo
-  if (sandProgress < 0.95) {
-    c.strokeStyle = '#f59e0b';
-    c.lineWidth = 0.9;
-    c.beginPath();
-    c.moveTo(0, 0);
-    c.lineTo(0, hh - 2.5);
-    c.stroke();
-  }
-
-  // Đụn cát ở bầu dưới (đầy dần)
-  const btmSandH = sandProgress * 3.8;
-  if (btmSandH > 0.4) {
-    c.fillStyle = '#f59e0b';
-    c.beginPath();
-    c.moveTo(-hw + 1, hh - 2);
-    c.lineTo(hw - 1, hh - 2);
-    c.lineTo(0, hh - 2 - btmSandH);
-    c.closePath();
-    c.fill();
-  }
-
-  // Phản quang sáng trên kính thủy tinh
-  c.strokeStyle = 'rgba(255, 255, 255, 0.8)';
-  c.lineWidth = 0.8;
-  c.beginPath();
-  c.moveTo(-hw + 1.2, -hh + 3.2);
-  c.lineTo(-1.5, -1);
-  c.stroke();
-
-  c.restore();
-}
-
-// 12. VẼ BÀN LÀM VIỆC, GHẾ XOAY, ĐỒNG HỒ CÁT & CHAI NƯỚC TRÊN BÀN
-function drawDesk(c) {
-  if (!desk.visible) return;
-
-  c.save();
-  c.imageSmoothingEnabled = false;
-
-  // Bóng đổ dưới sàn bàn làm việc
-  c.fillStyle = 'rgba(20, 20, 30, 0.28)';
-  c.beginPath();
-  c.ellipse(desk.x + desk.width / 2, groundY, desk.width * 0.45, 5, 0, 0, Math.PI * 2);
-  c.fill();
-
-  if (capy.state === CapyState.WORKING) {
-    // Khi đang làm việc: vẽ hình Capybara ngồi ghế trước laptop
-    if (workImg.complete && workImg.naturalWidth > 0) {
-      c.drawImage(workImg, desk.x, groundY - WORK_H, DESK_W, WORK_H);
-
-      // Nếu là chế độ làm việc tập trung (không phải chill): vẽ mồ hôi và đồng hồ cát
-      if (settings.computerMode !== 'chill') {
-        // Giọt mồ hôi nhỏ cố định trên trán khi làm việc
-        drawSweatDrop(c, desk.x + 40, groundY - WORK_H + 16, 2.2);
-
-        // ĐỒNG HỒ CÁT LOADING TRÊN ĐẦU CAPYBARA
-        drawHourglass(c, desk.x + 36, groundY - WORK_H - 12);
-      }
-    }
-  } else {
-    // Khi chưa ngồi vào: vẽ hình bàn ghế và laptop trống
-    if (deskImg.complete && deskImg.naturalWidth > 0) {
-      c.drawImage(deskImg, desk.x, groundY - DESK_H, DESK_W, DESK_H);
-    }
-  }
-
-  // KHI NHẮC UỐNG NƯỚC: CHAI NƯỚC ĐƯỢC ĐẶT TRÊN MẶT BÀN
-  if (waterReminderActive && bottleImg.complete && bottleImg.naturalWidth > 0) {
-    const bottleW = 14;
-    const bottleH = 30.5;
-    const bottleX = desk.x + 53;
-    const bottleY = groundY - 44; // Mặt bàn
-    const bounce = Math.sin(Date.now() * 0.006) * 1.5;
-
-    // Bóng đổ nhẹ dưới đáy chai nước
-    c.fillStyle = 'rgba(10, 10, 20, 0.35)';
-    c.beginPath();
-    c.ellipse(bottleX + bottleW / 2, bottleY + 1, 6, 2, 0, 0, Math.PI * 2);
-    c.fill();
-
-    // Vẽ chai nước (đã trích xuất từ ảnh người dùng)
-    c.drawImage(bottleImg, bottleX, bottleY - bottleH + bounce, bottleW, bottleH);
-
-    // Giọt nước nhỏ nhấp nháy phát sáng trên chai
-    const dripY = bottleY - bottleH - 5 + Math.sin(Date.now() * 0.008) * 2;
-    drawSweatDrop(c, bottleX + bottleW / 2, dripY, 1.8);
-  }
-
-  c.restore();
-}
-
-// 13. HIỂN THỊ LỜI NÓI (SPEECH BUBBLE: CHỮ ĐEN NỀN TRẮNG, DỒN SANG TRÁI, TAM GIÁC GÓC DƯỚI BÊN PHẢI)
-function drawSpeechBubbleUI(c) {
-  const isHiding = (capy.state === CapyState.HIDDEN || capy.state === CapyState.HIDING_RUN);
-  // Khi đang trốn: tuyệt đối không hiện nhắc uống nước, chỉ hiện lời thoại của trốn (nếu có)
-  const canShowWaterReminder = waterReminderActive && !isHiding;
-
-  if (!speechBubble.active && !canShowWaterReminder) return;
-
-  const now = Date.now();
-  if (speechBubble.active && !speechBubble.persistent && now > speechBubble.expiresAt) {
-    speechBubble.active = false;
-    if (!canShowWaterReminder) return;
-  }
-
-  let text = '';
-  let isWarning = false;
-  let anchorX = capy.x;
-  let anchorY = capy.y - RENDER_H;
-
-  // ƯU TIÊN 1: Lời thoại của hành động mới nhất (luôn thay thế và tắt text cũ)
-  if (speechBubble.active) {
-    text = speechBubble.text;
-    isWarning = speechBubble.isWarning;
-    if (capy.state === CapyState.WORKING && desk.visible) {
-      anchorX = desk.x + 36;
-      anchorY = groundY - WORK_H;
-    } else if (capy.state === CapyState.BATHING && tub.visible) {
-      anchorX = tub.x + tub.width / 2;
-      anchorY = tub.y;
-    } else if (isHiding) {
-      anchorX = canvas.width - 15;
-      anchorY = groundY - RENDER_H;
-    } else {
-      anchorX = capy.x;
-      anchorY = capy.y - RENDER_H;
-    }
-  }
-  // ƯU TIÊN 2: Nhắc uống nước khi không có hành động nào khác đang nói và không ở chế độ trốn
-  else if (canShowWaterReminder) {
-    text = Messages.waterReminder;
-    if (capy.state === CapyState.WORKING && desk.visible) {
-      anchorX = desk.x + 36;
-      anchorY = groundY - WORK_H;
-    } else if (capy.state === CapyState.BATHING && tub.visible) {
-      anchorX = tub.x + tub.width / 2;
-      anchorY = tub.y;
-    } else {
-      anchorX = capy.x;
-      anchorY = capy.y - RENDER_H;
-    }
-  }
-
-  c.save();
-  c.font = 'bold 12px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-
-  const textMetrics = c.measureText(text);
-  const padX = 14;
-  const padY = 8;
-  const boxW = textMetrics.width + padX * 2;
-  const boxH = 30;
-
-  // Dồn sang trái tính từ đầu Capybara:
-  // Cạnh phải của khung chat nằm tại (anchorX + 16), toàn bộ khung mở rộng về bên trái
-  let boxX = anchorX - boxW + 16;
-  boxX = Math.max(12, Math.min(canvas.width - boxW - 12, boxX));
-  let boxY = anchorY - boxH - 12;
-  boxY = Math.max(10, Math.min(canvas.height - boxH - 20, boxY));
-
-  // Bóng đổ nhẹ
-  c.fillStyle = 'rgba(0, 0, 0, 0.22)';
-  c.beginPath();
-  c.roundRect(boxX + 2, boxY + 2.5, boxW, boxH, 8);
-  c.fill();
-
-  // Nền trắng, viền
-  const borderColor = isWarning ? '#e11d48' : (waterReminderActive ? '#0284c7' : '#cbd5e1');
-  c.fillStyle = '#ffffff';
-  c.strokeStyle = borderColor;
-  c.lineWidth = 1.6;
-  c.beginPath();
-  c.roundRect(boxX, boxY, boxW, boxH, 8);
-  c.fill();
-  c.stroke();
-
-  // Tam giác ở góc dưới bên phải trỏ xuống đầu Capybara
-  const tailX = Math.min(boxX + boxW - 14, Math.max(boxX + 14, anchorX));
-  c.fillStyle = '#ffffff';
-  c.strokeStyle = borderColor;
-  c.beginPath();
-  c.moveTo(tailX - 6, boxY + boxH);
-  c.lineTo(tailX, boxY + boxH + 8);
-  c.lineTo(tailX + 6, boxY + boxH);
-  c.closePath();
-  c.fill();
-  c.stroke();
-
-  // Xóa đường viền đè giữa tam giác và thân khung chat
-  c.fillStyle = '#ffffff';
-  c.fillRect(tailX - 5.5, boxY + boxH - 1.5, 11, 2.5);
-
-  // Chữ đen nền trắng
-  c.fillStyle = isWarning ? '#9f1239' : '#0f172a';
-  c.textAlign = 'center';
-  c.textBaseline = 'middle';
-  c.fillText(text, boxX + boxW / 2, boxY + boxH / 2);
-
-  c.restore();
-}
 
 // 12. HIỆU ỨNG MẮT X, XOÁY ỐC CHÓNG MẶT MÀU TÍM, MỒ HÔI
 function drawPixelX(c, x, y, size = 7, color = '#1a1008') {
@@ -1993,6 +1206,7 @@ function drawAngerMark(c, x, y) {
   c.fillText('💢', 0, 0);
   c.restore();
 }
+window.drawAngerMark = drawAngerMark;
 
 // 13. VẼ CAPYBARA
 function drawCapybaraOutside(c) {
@@ -2004,57 +1218,72 @@ function drawCapybaraOutside(c) {
     capy.state === CapyState.WALK_LEFT ||
     capy.state === CapyState.FETCHING_DESK ||
     capy.state === CapyState.FETCHING_TUB ||
+    capy.state === CapyState.FETCHING_WATER_GLASS ||
+    capy.state === CapyState.RETURNING_TO_TUB ||
+    capy.state === CapyState.RETURNING_TO_DESK ||
     capy.state === CapyState.APPROACHING_DESK ||
     capy.state === CapyState.APPROACHING_TUB ||
-    capy.state === CapyState.HIDING_RUN
+    capy.state === CapyState.HIDING_RUN ||
+    capy.state === CapyState.LEAVING_RUNAWAY ||
+    capy.state === CapyState.GATE_ENTER ||
+    capy.state === CapyState.GATE_EMERGE
   );
-  const isPushing = (capy.state === CapyState.PUSHING_DESK || capy.state === CapyState.PUSHING_TUB || capy.state === CapyState.RETRACTING_DESK || capy.state === CapyState.RETRACTING_TUB);
+  const isPushing = (
+    capy.state === CapyState.PUSHING_DESK ||
+    capy.state === CapyState.PUSHING_TUB ||
+    capy.state === CapyState.PUSHING_WATER_GLASS ||
+    capy.state === CapyState.RETRACTING_DESK ||
+    capy.state === CapyState.RETRACTING_TUB ||
+    capy.state === CapyState.RETRACTING_WATER_GLASS
+  );
   const isDragged = (capy.state === CapyState.DRAGGED);
-  const isSleeping = (capy.state === CapyState.SLEEPING);
-  const isDizzy = (capy.state === CapyState.DIZZY);
+  const isSleeping = (capy.state === CapyState.SLEEPING || capy.state === CapyState.HUNGRY_STRIKE_SLEEP);
   const isFalling = (capy.state === CapyState.FALLING);
 
   let bodyYOffset = 0;
   if (isWalking || isPushing) {
     bodyYOffset = Math.sin(capy.walkPhase * 2) * 1.5;
-  } else if (!isDragged && !isSleeping && !isDizzy && !isFalling) {
+  } else if (!isDragged && !isSleeping && !isFalling) {
     bodyYOffset = Math.sin(capy.breathPhase) * 1.2;
   }
 
   c.save();
   c.translate(capy.x, capy.y);
   c.scale(capy.facing, 1);
+  if ((capy.state === CapyState.JUMPING || capy.state === CapyState.WOOD_LOG_INTERACT) && capy.jumpAngle) {
+    c.rotate(capy.jumpAngle);
+  }
   c.imageSmoothingEnabled = false;
 
   const distToGround = Math.max(0, groundY - capy.y);
   const shadowAlpha = Math.max(0.06, 0.25 - distToGround * 0.0015);
-  const shadowScale = isDizzy ? 1.25 : (isSleeping ? 1.15 : (isDragged || isFalling ? Math.max(0.35, 1 - distToGround * 0.003) : 1));
+  const shadowScale = isSleeping ? 1.15 : (isDragged || isFalling ? Math.max(0.35, 1 - distToGround * 0.003) : 1);
 
   c.fillStyle = `rgba(20, 20, 30, ${shadowAlpha})`;
   c.beginPath();
   c.ellipse(0, distToGround, 24 * shadowScale, 5 * shadowScale, 0, 0, Math.PI * 2);
   c.fill();
 
-  // A. DÁNG NGÃ CHÓNG MẶT (DIZZY)
-  if (isDizzy) {
-    const drawX = -FALLEN_W / 2;
-    const drawY = -FALLEN_H + 2;
+  // A. VẼ CHIẾC DÙ LƯỢN TRÊN LƯNG CAPYBARA KHI RƠI TỪ ĐỘ CAO > 30% MÀN HÌNH VÀ ĐÃ RƠI QUA 30% QUÃNG ĐƯỜNG
+  const startY = (typeof capy.fallStartY === 'number') ? capy.fallStartY : (groundY - 100);
+  const totalFallDist = Math.max(1, groundY - startY);
+  const fallenDist = capy.y - startY;
+  const hasPassed30Percent = (fallenDist / totalFallDist) >= 0.30;
 
-    if (fallenImg.complete && fallenImg.naturalWidth > 0) {
-      c.drawImage(
-        fallenImg,
-        0, 0, fallenImg.naturalWidth, fallenImg.naturalHeight,
-        drawX, drawY, FALLEN_W, FALLEN_H
-      );
-    }
+  if (isFalling && capy.fallingFromHigh && hasPassed30Percent && parachuteImg.complete && parachuteImg.naturalWidth > 0) {
+    c.save();
+    // Dù đứng yên không lắc lư
+    const paraW = PARACHUTE_W;
+    const paraH = PARACHUTE_H;
+    const paraX = -paraW / 2;
+    const paraY = -RENDER_H - paraH + 18;
 
-    const eyeX = drawX + 24;
-    const eyeY = drawY + 33;
-    drawPixelX(c, eyeX, eyeY, 7, '#1a1008');
-    drawPurpleDizzySpiral(c, eyeX, drawY - 8, capy.dizzyAngle);
-
+    c.drawImage(
+      parachuteImg,
+      0, 0, parachuteImg.naturalWidth, parachuteImg.naturalHeight,
+      paraX, paraY, paraW, paraH
+    );
     c.restore();
-    return;
   }
 
   // B. DÁNG NGỦ (SLEEPING)
@@ -2081,8 +1310,10 @@ function drawCapybaraOutside(c) {
     frameIndex = walkCycle[step];
   } else if (isDragged) {
     frameIndex = 2;
+  } else if (capy.state === CapyState.JUMPING || (capy.state === CapyState.WOOD_LOG_INTERACT && capy.woodLogPhase === 'JUMP')) {
+    frameIndex = 2; // Co chân bật nhảy trên không
   } else if (isFalling) {
-    frameIndex = (Math.floor(capy.walkPhase * 2.5) % 2 === 0) ? 1 : 2;
+    frameIndex = 0; // Chân thả lỏng đứng yên không cựa quậy
   } else if (capy.state === CapyState.LOST_ORANGE) {
     frameIndex = 0;
   }
@@ -2091,16 +1322,34 @@ function drawCapybaraOutside(c) {
     const drawX = -RENDER_W / 2;
     const drawY = -RENDER_H + 2 + bodyYOffset;
 
+    if (typeof gateState !== 'undefined' && typeof gateState.capyAlpha === 'number' && (capy.state === CapyState.GATE_ENTER || capy.state === CapyState.GATE_EMERGE)) {
+      c.globalAlpha = gateState.capyAlpha;
+    }
+
+    // Gậy nải hành lý (bindle stick) khi bỏ nhà ra đi - vẽ nằm DƯỚI ảnh Capybara
+    const isRunaway = (capy.state === CapyState.LEAVING_RUNAWAY || (typeof feedingSystem !== 'undefined' && feedingSystem.isLeavingRunaway));
+    if (isRunaway && bindleImg.complete && bindleImg.naturalWidth > 0) {
+      c.save();
+      c.scale(-1, 1);
+      const bW = 46;
+      const bH = 42;
+      const bX = -8;
+      const bY = -RENDER_H - 7 + bodyYOffset;
+      c.drawImage(bindleImg, bX, bY, bW, bH);
+      c.restore();
+    }
+
     c.drawImage(
       spriteSheet,
       frameIndex * FRAME_W, 0, FRAME_W, FRAME_H,
       drawX, drawY, RENDER_W, RENDER_H
     );
 
-    // Khi chạy ra cất bàn và xô: hiện đỏ mặt (4 gạch nhỏ sọc xéo đỏ) thể hiện xấu hổ thay vì mồ hôi
+    // Khi chạy ra cất bàn và xô hoặc cất ly nước: hiện đỏ mặt thể hiện xấu hổ
     const isRetractingProps = (
       capy.state === CapyState.RETRACTING_DESK ||
       capy.state === CapyState.RETRACTING_TUB ||
+      capy.state === CapyState.RETRACTING_WATER_GLASS ||
       capy.state === CapyState.APPROACHING_DESK ||
       capy.state === CapyState.APPROACHING_TUB ||
       retractWaitTimer > 0
@@ -2109,7 +1358,11 @@ function drawCapybaraOutside(c) {
     if (isRetractingProps) {
       // Đỏ mặt (4 gạch nhỏ sọc xéo đỏ) thể hiện xấu hổ
       drawShyBlush(c, 8.5, -27 + bodyYOffset);
-    } else if (capy.state === CapyState.PUSHING_DESK || capy.state === CapyState.PUSHING_TUB) {
+    } else if (
+      capy.state === CapyState.PUSHING_DESK ||
+      capy.state === CapyState.PUSHING_TUB ||
+      capy.state === CapyState.PUSHING_WATER_GLASS
+    ) {
       // Mồ hôi gắng sức khi đẩy bàn/xô vào
       const dripProgress = (Date.now() * 0.003) % 1; // 0 -> 1 tuần hoàn
       const dripY = -37 + dripProgress * 7; // Chảy từ -37 xuống -30
@@ -2123,6 +1376,15 @@ function drawCapybaraOutside(c) {
       if ((isDragged && heightAboveGround > canvas.height * 0.30) || (isFalling && capy.fallingFromHigh)) {
         drawSweatDrop(c, -RENDER_W / 2 - 4, -RENDER_H + 8, 2.3);
         drawSweatDrop(c, RENDER_W / 2 + 4, -RENDER_H + 12, 2.3);
+      } else if (capyOrangeCount >= 3 && orange.state === 'ON_HEAD' && capy.state !== CapyState.WORKING) {
+        // Khi xếp từ 3 quả cam trở lên: hiện giọt mồ hôi lăn vất vả gánh nặng
+        const dripProgress = (Date.now() * 0.003) % 1;
+        const dripY = -34 + dripProgress * 6;
+        const dripAlpha = Math.sin(dripProgress * Math.PI);
+        c.save();
+        c.globalAlpha = Math.max(0.3, dripAlpha);
+        drawSweatDrop(c, 13, dripY, 2.2);
+        c.restore();
       }
     }
 
@@ -2144,9 +1406,12 @@ function drawCapybaraOutside(c) {
       drawSweatDrop(c, -RENDER_W / 2 + 5, dripY, 1.8);
     }
 
-    // Biểu tượng giận 💢 trên đầu Capybara khi bị kéo lên cao (< 30%) tiếp đất
-    if (capy.angryUntil && Date.now() < capy.angryUntil) {
-      drawAngerMark(c, 12, -RENDER_H + 4 + bodyYOffset);
+    // Biểu tượng giận 💢 trên mặt Capybara khi bị kéo lên cao tiếp đất HOẶC khi đang ĐÓI HOẶC khi giận dỗi bỏ đi
+    const hasFoodArrived = (typeof droppedFoods !== 'undefined' && droppedFoods.length > 0);
+    const isHungryAngry = (typeof feedingSystem !== 'undefined' && feedingSystem.isHungry && !hasFoodArrived && !feedingSystem.isEatingFood);
+    const isLeavingRunaway = (capy.state === CapyState.LEAVING_RUNAWAY || (typeof feedingSystem !== 'undefined' && feedingSystem.isLeavingRunaway));
+    if ((capy.angryUntil && Date.now() < capy.angryUntil) || isHungryAngry || isLeavingRunaway) {
+      drawAngerMark(c, 10, -32 + bodyYOffset);
     }
   }
 
@@ -2163,10 +1428,10 @@ function updateCapy() {
     if (retractWaitTimer === 0) {
       if (retractTarget === 'desk' && desk.visible) {
         capy.state = CapyState.APPROACHING_DESK;
-        showSpeechBubble(Messages.almostForgot, 2500, false);
+        if (!speechBubble.active) showSpeechBubble(Messages.almostForgot, 2500, false);
       } else if (retractTarget === 'tub' && tub.visible) {
         capy.state = CapyState.APPROACHING_TUB;
-        showSpeechBubble(Messages.almostForgot, 2500, false);
+        if (!speechBubble.active) showSpeechBubble(Messages.almostForgot, 2500, false);
       } else {
         retractTarget = null;
       }
@@ -2192,8 +1457,9 @@ function updateCapy() {
     capy.state === CapyState.IDLE_LEFT
   );
 
-  // QUAN TRỌNG: Chỉ đếm timer tìm cam khi KHÔNG trong thời gian đứng yên (capy.idleTimer <= 0) để bảo đảm Capy đứng yên trọn vẹn 3s khi ngã dậy
-  if (isRoamingState && orange.state === 'ON_GROUND' && capy.idleTimer <= 0) {
+  // QUAN TRỌNG: Chỉ đếm timer tìm cam khi KHÔNG trong thời gian đứng yên và Cổng KHÔNG hoạt động
+  const isGateActive = (typeof gateState !== 'undefined' && gateState.active);
+  if (isRoamingState && orange.state === 'ON_GROUND' && capy.idleTimer <= 0 && !isGateActive) {
     if (!capy.lostNoticeTimer) capy.lostNoticeTimer = 0;
     capy.lostNoticeTimer++;
     if (capy.lostNoticeTimer >= 60) { // ~2 giây đi dạo rồi mới ngơ ngác tìm cam
@@ -2209,13 +1475,14 @@ function updateCapy() {
 
   switch (capy.state) {
     case CapyState.WALK_RIGHT: {
-      if (waterReminderActive && capy.state !== CapyState.WORKING && capy.state !== CapyState.BATHING) {
-        capy.state = CapyState.IDLE_RIGHT;
-        break;
-      }
       capy.facing = 1;
-      capy.x += capy.speed;
-      capy.walkPhase += 0.07;
+
+      // Cứ mỗi quả cam được xếp chồng thêm, tốc độ giảm 30% hiện tại (0.7 ^ (capyOrangeCount - 1))
+      const orangeWeightFactor = Math.pow(0.70, Math.max(0, capyOrangeCount - 1));
+      const currentWalkSpeed = capy.speed * orangeWeightFactor;
+
+      capy.x += currentWalkSpeed;
+      capy.walkPhase += 0.07 * orangeWeightFactor;
 
       let rightLimit = canvas.width - 45;
       if (tub.visible && tub.x > capy.x) rightLimit = Math.min(rightLimit, tub.x - 34);
@@ -2229,10 +1496,26 @@ function updateCapy() {
       break;
     }
 
-    case CapyState.IDLE_RIGHT:
-      if (waterReminderActive && capy.state !== CapyState.WORKING && capy.state !== CapyState.BATHING) {
-        break; // Đứng yên trước bình nước
+    case CapyState.HUNGRY_STANDING:
+    case CapyState.HUNGRY_STRIKE_SLEEP:
+      capy.breathPhase += 0.04;
+      break;
+
+    case CapyState.LEAVING_RUNAWAY:
+      capy.facing = -1;
+      capy.x -= 2.2;
+      capy.walkPhase += 0.18;
+      if (capy.x < -80) {
+        if (!window._quittingApp) {
+          window._quittingApp = true;
+          if (typeof ipcRenderer !== 'undefined') {
+            ipcRenderer.send('panel-quit-app');
+          }
+        }
       }
+      break;
+
+    case CapyState.IDLE_RIGHT:
       capy.idleTimer--;
       if (capy.idleTimer <= 0) {
         capy.state = (capy.x >= canvas.width - 60) ? CapyState.WALK_LEFT : CapyState.WALK_RIGHT;
@@ -2240,13 +1523,14 @@ function updateCapy() {
       break;
 
     case CapyState.WALK_LEFT: {
-      if (waterReminderActive && capy.state !== CapyState.WORKING && capy.state !== CapyState.BATHING) {
-        capy.state = CapyState.IDLE_LEFT;
-        break;
-      }
       capy.facing = -1;
-      capy.x -= capy.speed;
-      capy.walkPhase += 0.07;
+
+      // Cứ mỗi quả cam được xếp chồng thêm, tốc độ giảm 30% hiện tại
+      const orangeWeightFactor = Math.pow(0.70, Math.max(0, capyOrangeCount - 1));
+      const currentWalkSpeed = capy.speed * orangeWeightFactor;
+
+      capy.x -= currentWalkSpeed;
+      capy.walkPhase += 0.07 * orangeWeightFactor;
 
       if (capy.x <= 40) {
         capy.x = 40;
@@ -2257,9 +1541,6 @@ function updateCapy() {
     }
 
     case CapyState.IDLE_LEFT:
-      if (waterReminderActive && capy.state !== CapyState.WORKING && capy.state !== CapyState.BATHING) {
-        break; // Đứng yên trước bình nước
-      }
       capy.idleTimer--;
       if (capy.idleTimer <= 0) {
         capy.state = (capy.x <= 60) ? CapyState.WALK_RIGHT : CapyState.WALK_LEFT;
@@ -2299,6 +1580,12 @@ function updateCapy() {
         capy.x = desk.x;
         capy.y = groundY;
         spawnWakeStars(desk.x + DESK_W / 2, groundY - 40);
+
+        if (orange.state === 'ON_HEAD') {
+          dropOrange(-1, -3.2);
+          orange.x = desk.x + 20;
+          orange.y = groundY - WORK_H + 10;
+        }
 
         if (settings.computerMode === 'chill') {
           showSpeechBubble(Messages.workChill, 3500, false);
@@ -2402,7 +1689,14 @@ function updateCapy() {
       if (desk.x >= canvas.width + 15) {
         desk.visible = false;
         retractTarget = null;
-        if (orange.state === 'ON_GROUND' || orange.state === 'FALLING') {
+        const nextAct = nextActionAfterRetract;
+        nextActionAfterRetract = null;
+
+        if (nextAct === 'bath') triggerBath();
+        else if (nextAct === 'work') triggerWork();
+        else if (nextAct === 'hide') triggerHide();
+        else if (nextAct === 'roam') triggerRoam();
+        else if (orange.state === 'ON_GROUND' || orange.state === 'FALLING') {
           capy.state = CapyState.LOST_ORANGE;
           capy.lostOrangeTimer = 0;
           capy.walkPhase = 0;
@@ -2455,7 +1749,14 @@ function updateCapy() {
       if (tub.x >= canvas.width + 15) {
         tub.visible = false;
         retractTarget = null;
-        if (orange.state === 'ON_GROUND' || orange.state === 'FALLING') {
+        const nextAct = nextActionAfterRetract;
+        nextActionAfterRetract = null;
+
+        if (nextAct === 'bath') triggerBath();
+        else if (nextAct === 'work') triggerWork();
+        else if (nextAct === 'hide') triggerHide();
+        else if (nextAct === 'roam') triggerRoam();
+        else if (orange.state === 'ON_GROUND' || orange.state === 'FALLING') {
           capy.state = CapyState.LOST_ORANGE;
           capy.lostOrangeTimer = 0;
           capy.walkPhase = 0;
@@ -2467,6 +1768,23 @@ function updateCapy() {
       }
       break;
     }
+
+    case CapyState.JUMPING:
+      if (typeof updateCapyJump === 'function') updateCapyJump();
+      break;
+
+    case CapyState.WOOD_LOG_INTERACT:
+      if (typeof updateCapyWoodLogInteract === 'function') updateCapyWoodLogInteract();
+      break;
+
+    case CapyState.FETCHING_WATER_GLASS:
+    case CapyState.PUSHING_WATER_GLASS:
+    case CapyState.WAITING_WATER_DRINK:
+    case CapyState.RETRACTING_WATER_GLASS:
+    case CapyState.RETURNING_TO_TUB:
+    case CapyState.RETURNING_TO_DESK:
+      if (typeof updateWaterReminderSystem === 'function') updateWaterReminderSystem();
+      break;
 
     case CapyState.WORKING:
       // Đang ngồi làm việc trước laptop
@@ -2487,46 +1805,57 @@ function updateCapy() {
       }
       break;
 
-    case CapyState.FALLING:
-      capy.vy += 0.75;
+    case CapyState.FALLING: {
+      const startY = (typeof capy.fallStartY === 'number') ? capy.fallStartY : (groundY - 100);
+      const totalFallDist = Math.max(1, groundY - startY);
+      const fallenDist = capy.y - startY;
+      const fallRatio = Math.max(0, fallenDist / totalFallDist);
+
+      // Nếu kéo nhấc lên thấp (<= 30% màn hình): Rơi thẳng xuống tiếp đất bình thường, không bung dù
+      if (!capy.fallingFromHigh) {
+        capy.vy += 0.55;
+      }
+      // Nếu kéo lên cao (> 30% màn hình): Rơi 30% quãng đường đầu tự do, sau đó bung dù hạ cánh
+      else if (fallRatio < 0.30) {
+        capy.vy += 0.55; // Trọng lực rơi nhanh
+      } else {
+        // Đã qua 30% quãng đường & Rơi từ trên cao: Bung dù hãm phanh
+        if (!capy.hasSpokenDizzyQuote) {
+          capy.hasSpokenDizzyQuote = true;
+          if (typeof showSpeechBubble === 'function' && Messages.wakeDizzyQuotes && Messages.wakeDizzyQuotes.length > 0) {
+            const quote = Messages.wakeDizzyQuotes[Math.floor(Math.random() * Messages.wakeDizzyQuotes.length)];
+            showSpeechBubble(quote, 2500, false);
+          }
+        }
+        capy.vy = Math.min(capy.vy + 0.12, 2.2);
+        // Capybara lắc đung đưa nhẹ xíu (không lắc dù)
+        capy.x += Math.sin(Date.now() * 0.008) * 0.7;
+      }
       capy.y += capy.vy;
-      capy.walkPhase += 0.25;
+      capy.walkPhase += 0.08;
 
       if (capy.y >= groundY) {
         capy.y = groundY;
         capy.vy = 0;
+        capy.fallStartY = undefined;
+        capy.hasSpokenDizzyQuote = false;
+
+        // Tiếp đất nhẹ nhàng bằng chân ở trạng thái bình thản (không hiện message nữa)
+        capy.state = (capy.facing === 1) ? CapyState.WALK_RIGHT : CapyState.WALK_LEFT;
 
         if (capy.fallingFromHigh) {
-          capy.state = CapyState.DIZZY;
           capy.fallingFromHigh = false;
-          capy.dizzyAngle = 0;
-          capy.dizzyTimer = 0;
-          spawnImpactStars(capy.x, groundY - 10);
-        } else {
-          capy.state = (capy.facing === 1) ? CapyState.WALK_RIGHT : CapyState.WALK_LEFT;
-
-          // KHI BỊ KÉO LÊN CAO (CHƯA QUÁ 30% ĐỂ NGÃ) HIỆN NGAY KHI TIẾP ĐẤT:
-          if (capy.droppedFromLow) {
-            capy.droppedFromLow = false;
-            capy.angryUntil = Date.now() + 4000;
-            if (Messages.dropLowQuotes && Messages.dropLowQuotes.length > 0) {
-              const quote = Messages.dropLowQuotes[Math.floor(Math.random() * Messages.dropLowQuotes.length)];
-              showSpeechBubble(quote, 4000, true);
-            }
+        } else if (capy.droppedFromLow) {
+          capy.droppedFromLow = false;
+          capy.angryUntil = Date.now() + 3000;
+          if (Messages.dropLowQuotes && Messages.dropLowQuotes.length > 0) {
+            const quote = Messages.dropLowQuotes[Math.floor(Math.random() * Messages.dropLowQuotes.length)];
+            showSpeechBubble(quote, 3000, true);
           }
         }
       }
       break;
-
-    case CapyState.DIZZY:
-      capy.dizzyAngle += 0.08;
-      if (!capy.dizzyTimer) capy.dizzyTimer = 0;
-      capy.dizzyTimer++;
-      // Sau khoảng 2.4s nằm ngã chóng mặt nếu không click, Capy tự gượng dậy đứng yên 3s càm ràm
-      if (capy.dizzyTimer >= 110) {
-        wakeCapyFromDizzy();
-      }
-      break;
+    }
 
     case CapyState.LOST_ORANGE:
       capy.lostOrangeTimer++;
@@ -2566,6 +1895,21 @@ function updateCapy() {
       capy.walkPhase = 0;
       capy.facing = 1;
       break;
+
+    case CapyState.LEAVING_RUNAWAY: {
+      capy.facing = -1;
+      capy.x -= 2.2;
+      capy.walkPhase += 0.22;
+      if (capy.x < -80) {
+        try {
+          const { ipcRenderer } = require('electron');
+          ipcRenderer.send('panel-quit-app');
+        } catch (e) {
+          window.close();
+        }
+      }
+      break;
+    }
   }
 }
 
@@ -2595,109 +1939,10 @@ function updateWorkAndHydrationTimers() {
   // 2. Kiểm tra chu kỳ nhắc uống nước
   const nowMs = Date.now();
   if (!waterReminderActive && (nowMs - lastWaterReminderTime) >= settings.waterIntervalSec * 1000) {
-    waterReminderActive = true;
-    // Nếu đang ở mode đi dạo: dừng Capy lại không cho đi dạo nữa
-    if (capy.state === CapyState.WALK_RIGHT) {
-      capy.state = CapyState.IDLE_RIGHT;
-    } else if (capy.state === CapyState.WALK_LEFT) {
-      capy.state = CapyState.IDLE_LEFT;
-    }
-  }
-}
-
-// 14c. CÁC CÂU THOẠI NGU NGƠ RANDOM KHI ĐI DẠO (MỖI 10S HIỆN 5S RỒI TẮT)
-let lastRoamQuoteEndTime = Date.now();
-let lastSpokenRoamQuote = '';
-const ROAM_QUOTE_PAUSE_MS = 8000;    // Nghỉ 10s giữa các lần hiện
-const ROAM_QUOTE_DURATION_MS = 5000;  // Mỗi lần hiện 5s rồi tự tắt
-
-function updateRoamRandomQuotes() {
-  const isRoaming = (
-    capy.state === CapyState.WALK_RIGHT ||
-    capy.state === CapyState.WALK_LEFT ||
-    capy.state === CapyState.IDLE_RIGHT ||
-    capy.state === CapyState.IDLE_LEFT
-  );
-
-  // Chỉ hiện khi đi dạo (không ngủ, không ngơ ngác mất cam, không nhắc nước, không tắm, không làm việc, không đẩy đồ)
-  if (!isRoaming || waterReminderActive || capy.state === CapyState.LOST_ORANGE || capy.state === CapyState.SLEEPING) {
-    lastRoamQuoteEndTime = Date.now();
-    return;
-  }
-
-  // Nếu đang có câu thoại nào đang hiển thị thì không chèn thêm
-  if (speechBubble.active) return;
-
-  const now = Date.now();
-  if (now - lastRoamQuoteEndTime >= ROAM_QUOTE_PAUSE_MS) {
-    if (Messages.roamQuotes && Messages.roamQuotes.length > 0) {
-      let quote = Messages.roamQuotes[Math.floor(Math.random() * Messages.roamQuotes.length)];
-      if (Messages.roamQuotes.length > 1 && quote === lastSpokenRoamQuote) {
-        quote = Messages.roamQuotes[Math.floor(Math.random() * Messages.roamQuotes.length)];
-      }
-      lastSpokenRoamQuote = quote;
-      showSpeechBubble(quote, ROAM_QUOTE_DURATION_MS, false);
-      lastRoamQuoteEndTime = now + ROAM_QUOTE_DURATION_MS; // Bắt đầu tính 10s sau khi câu thoại 5s này biến mất
-    }
-  }
-}
-
-// 14d. CÂU THOẠI VU VƠ KHI NGỒI LÀM VIỆC (MỖI 10S HIỆN 5S RỒI TẮT)
-let lastWorkQuoteEndTime = Date.now();
-let lastSpokenWorkQuote = '';
-const WORK_QUOTE_PAUSE_MS = 8000;    // Nghỉ 10s giữa các lần hiện
-const WORK_QUOTE_DURATION_MS = 5000;  // Mỗi lần hiện 5s rồi tự tắt
-
-function updateWorkRandomQuotes() {
-  // Chỉ hiện khi Capybara đang ngồi làm việc tại bàn
-  if (capy.state !== CapyState.WORKING || !desk.visible || waterReminderActive) {
-    lastWorkQuoteEndTime = Date.now();
-    return;
-  }
-
-  // Nếu đang có câu thoại nào đang hiển thị thì không chèn thêm
-  if (speechBubble.active) return;
-
-  const now = Date.now();
-  if (now - lastWorkQuoteEndTime >= WORK_QUOTE_PAUSE_MS) {
-    if (Messages.workQuotes && Messages.workQuotes.length > 0) {
-      let quote = Messages.workQuotes[Math.floor(Math.random() * Messages.workQuotes.length)];
-      if (Messages.workQuotes.length > 1 && quote === lastSpokenWorkQuote) {
-        quote = Messages.workQuotes[Math.floor(Math.random() * Messages.workQuotes.length)];
-      }
-      lastSpokenWorkQuote = quote;
-      showSpeechBubble(quote, WORK_QUOTE_DURATION_MS, false);
-      lastWorkQuoteEndTime = now + WORK_QUOTE_DURATION_MS; // Bắt đầu tính 10s sau khi câu thoại 5s biến mất
-    }
-  }
-}
-
-// 14e. CÂU THOẠI KHI TẮM ONSEN (MỖI 10S HIỆN 5S RỒI TẮT)
-let lastBathQuoteEndTime = Date.now();
-let lastSpokenBathQuote = '';
-const BATH_QUOTE_PAUSE_MS = 8000;    // Nghỉ 10s giữa các lần hiện
-const BATH_QUOTE_DURATION_MS = 5000;  // Mỗi lần hiện 5s rồi tự tắt
-
-function updateBathRandomQuotes() {
-  // Chỉ hiện khi Capybara đang tắm trong bồn Onsen
-  if (capy.state !== CapyState.BATHING || !tub.visible || waterReminderActive) {
-    lastBathQuoteEndTime = Date.now();
-    return;
-  }
-
-  // Nếu đang có câu thoại nào đang hiển thị thì không chèn thêm
-  if (speechBubble.active) return;
-
-  const now = Date.now();
-  if (now - lastBathQuoteEndTime >= BATH_QUOTE_PAUSE_MS) {
-    if (Messages.bathQuotes && Messages.bathQuotes.length > 0) {
-      let quote = Messages.bathQuotes[Math.floor(Math.random() * Messages.bathQuotes.length)];
-      if (Messages.bathQuotes.length > 1 && quote === lastSpokenBathQuote) {
-        quote = Messages.bathQuotes[Math.floor(Math.random() * Messages.bathQuotes.length)];
-      }
-      lastSpokenBathQuote = quote;
-      showSpeechBubble(quote, BATH_QUOTE_DURATION_MS, false);
-      lastBathQuoteEndTime = now + BATH_QUOTE_DURATION_MS; // Bắt đầu tính 10s sau khi câu thoại 5s biến mất
+    if (typeof startWaterReminder === 'function') {
+      startWaterReminder();
+    } else {
+      waterReminderActive = true;
     }
   }
 }
@@ -2721,23 +1966,32 @@ function loop(timestamp) {
   const isHighAction = (
     isDraggingCapy ||
     capy.state === CapyState.FALLING ||
+    capy.state === CapyState.JUMPING ||
+    capy.state === CapyState.WOOD_LOG_INTERACT ||
     capy.y < groundY - 20 ||
-    orange.state === 'FALLING'
+    orange.state === 'FALLING' ||
+    capyOrangeCount >= 3 ||
+    groundOranges.length > 0 ||
+    (typeof isWoodLogFlying === 'function' && isWoodLogFlying()) ||
+    (typeof droppedFoods !== 'undefined' && droppedFoods.some(f => f.state === 'FALLING_WITH_PARACHUTE' || f.y < groundY - 320))
   );
 
   if (isHighAction || needsFullClear) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     needsFullClear = isHighAction;
   } else {
-    const stripH = 195;
-    ctx.clearRect(0, groundY - stripH, canvas.width, stripH + 10);
+    const stripH = 350;
+    ctx.clearRect(0, groundY - stripH, canvas.width, stripH + 20);
   }
 
   updateWorkAndHydrationTimers();
   updateCapy();
+  if (typeof updateGateSystem === 'function') updateGateSystem();
+  if (typeof updateFeedingSystem === 'function') updateFeedingSystem();
   updateRoamRandomQuotes();
   updateWorkRandomQuotes();
   updateBathRandomQuotes();
+  if (typeof updateWoodLog === 'function') updateWoodLog();
   updateOrange();
   updateZzz();
   updateSteam();
@@ -2749,30 +2003,21 @@ function loop(timestamp) {
   // 2. Vẽ bàn làm việc & ghế xoay (kèm đồng hồ cát và bình nước trên bàn nếu có nhắc)
   drawDesk(ctx);
 
-  // 3. Vẽ Capybara bên ngoài (đi / đứng / đẩy / rơi / ngã)
+  // 2.5. Vẽ khúc gỗ chướng ngại vật (vẽ trước Capy để Capy nhảy đè lên phía trên)
+  if (typeof drawWoodLog === 'function') drawWoodLog(ctx);
+
+  // 2.8. Vẽ Cổng dịch chuyển không gian (Gate)
+  if (typeof drawGateSystem === 'function') drawGateSystem(ctx);
+
+  // 3. Vẽ Capybara bên ngoài (đi / đứng / đẩy / rơi / ngã / nhảy)
   drawCapybaraOutside(ctx);
 
-  // KHI NHẮC UỐNG NƯỚC Ở MODE ĐI DẠO: HIỆN BÌNH TRƯỚC MẶT CAPYBARA KHÔNG CHO ĐI TIẾP
-  if (waterReminderActive && capy.state !== CapyState.WORKING && capy.state !== CapyState.BATHING && capy.state !== CapyState.HIDING_RUN && capy.state !== CapyState.HIDDEN && !tub.visible && !desk.visible && bottleImg.complete && bottleImg.naturalWidth > 0) {
-    const bw = 14;
-    const bh = 30.5;
-    // Hiện ngay trước mặt Capybara tính theo hướng quay mặt
-    const bx = (capy.facing === 1) ? (capy.x + 28) : (capy.x - 28 - bw);
-    const by = groundY - 3;
-    const bounce = Math.sin(Date.now() * 0.006) * 1.5;
+  // 3.5. Vẽ Bảng đòi ăn trên đầu Capy khi đang đói
+  if (typeof drawFeedingSystem === 'function') drawFeedingSystem(ctx);
 
-    // Bóng đổ dưới sàn
-    ctx.fillStyle = 'rgba(10, 10, 20, 0.35)';
-    ctx.beginPath();
-    ctx.ellipse(bx + bw / 2, groundY, 6, 2, 0, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Chai nước
-    ctx.drawImage(bottleImg, bx, by - bh + bounce, bw, bh);
-
-    // Giọt nước phát sáng
-    const dripY = by - bh - 5 + Math.sin(Date.now() * 0.008) * 2;
-    drawSweatDrop(ctx, bx + bw / 2, dripY, 1.8);
+  // KHI NHẮC UỐNG NƯỚC: VẼ LY NƯỚC KHỔNG LỒ & NÚT BẤM "UỐNG NGAY ĐI BRO"
+  if (typeof drawWaterReminderSystem === 'function') {
+    drawWaterReminderSystem(ctx);
   }
 
   // 4. Hiệu ứng va đập / Thức dậy
@@ -2795,6 +2040,7 @@ function checkStart() {
   if (loadedCount >= 9) {
     console.log('Capybara da tai xong 9 anh va bat dau di dao tren desktop!');
     setMouseIgnore(true);
+    lastWaterReminderTime = Date.now();
     requestAnimationFrame(loop);
   }
 }
@@ -2804,7 +2050,7 @@ if (orangeImg.complete) checkStart(); else orangeImg.onload = checkStart;
 if (sleepImg.complete) checkStart(); else sleepImg.onload = checkStart;
 if (tubImg.complete) checkStart(); else tubImg.onload = checkStart;
 if (tubBathImg.complete) checkStart(); else tubBathImg.onload = checkStart;
-if (fallenImg.complete) checkStart(); else fallenImg.onload = checkStart;
+if (parachuteImg.complete) checkStart(); else parachuteImg.onload = checkStart;
 if (deskImg.complete) checkStart(); else deskImg.onload = checkStart;
 if (workImg.complete) checkStart(); else workImg.onload = checkStart;
 if (bottleImg.complete) checkStart(); else bottleImg.onload = checkStart;

@@ -20,7 +20,7 @@
         "portable",
         "nsis"
       ],
-      "icon": "assets/icon.ico"
+      "icon": "assets/app/icon.ico"
     },
     "nsis": {
       "oneClick": false,

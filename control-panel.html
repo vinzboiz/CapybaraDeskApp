@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Capy Control Panel</title>
+  <link rel="stylesheet" href="control-panel.css">
+</head>
+<body>
+  <!-- HEADER: Drag bar + Title + Window controls -->
+  <header id="panel-header">
+    <div class="header-left">
+      <img src="assets/app/icon.png" alt="Capy" class="header-icon">
+      <span class="header-title">Capy Panel</span>
+    </div>
+    <div class="header-controls">
+      <button id="btn-minimize" class="win-btn" title="Thu nhỏ">
+        <svg width="10" height="1" viewBox="0 0 10 1"><rect width="10" height="1" fill="currentColor"/></svg>
+      </button>
+      <button id="btn-close" class="win-btn close" title="Đóng">
+        <svg width="10" height="10" viewBox="0 0 10 10"><path d="M1 1L9 9M9 1L1 9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main id="panel-body">
+    <!-- 0. LIVE ENERGY STATUS -->
+    <section class="section" style="padding-bottom: 0;">
+      <div class="energy-card">
+        <div class="energy-header">
+          <div class="energy-title-group">
+            <span class="energy-icon">⚡</span>
+            <span class="energy-title">Năng Lượng Capybara</span>
+          </div>
+          <span id="panel-energy-val" class="energy-val">100%</span>
+        </div>
+        <div class="energy-track">
+          <div id="panel-energy-bar" class="energy-fill" style="width: 100%;"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 1. QUICK ACTIONS -->
+    <section class="section">
+      <div class="section-label">Hành Động Nhanh</div>
+      <div class="quick-actions">
+        <button id="qa-orange" class="qa-btn" title="Bật/Tắt ném cam">
+          <span class="qa-icon">🍊</span>
+          <span class="qa-text">Cam</span>
+          <span class="qa-status">OFF</span>
+        </button>
+        <button id="qa-wood" class="qa-btn" title="Bật/Tắt khúc gỗ">
+          <span class="qa-icon">🪵</span>
+          <span class="qa-text">Gỗ</span>
+          <span class="qa-status">OFF</span>
+        </button>
+        <button id="qa-hide" class="qa-btn" title="Cho Capy trốn">
+          <span class="qa-icon">🫣</span>
+          <span class="qa-text">Trốn</span>
+          <span class="qa-status"></span>
+        </button>
+        <button id="qa-hungry" class="qa-btn" title="Click 1: Đói 30% | Click 2: Cạn kiệt 0% bỏ đi">
+          <span class="qa-icon">🍽️</span>
+          <span class="qa-text">Test Đói</span>
+          <span class="qa-status">30%</span>
+        </button>
+        <button id="qa-water" class="qa-btn" title="Kích hoạt nhắc uống nước ngay">
+          <span class="qa-icon">🥛</span>
+          <span class="qa-text">Nhắc Nước</span>
+          <span class="qa-status">Test</span>
+        </button>
+        <button id="qa-gate" class="qa-btn" title="Kích hoạt Cổng Không Gian (Phím G)">
+          <span class="qa-icon">⛩️</span>
+          <span class="qa-text">Cổng</span>
+          <span class="qa-status">Gate</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- 2. SETTINGS -->
+    <section class="section">
+      <div class="section-label">Cài Đặt</div>
+
+      <div class="setting-card">
+        <div class="card-row">
+          <span class="card-icon">💻</span>
+          <span class="card-label">Thời gian làm việc</span>
+          <select id="set-work-duration">
+            <option value="30">⚡ 30s</option>
+            <option value="900">15 phút</option>
+            <option value="1800">30 phút</option>
+            <option value="3600" selected>1 tiếng</option>
+            <option value="7200">2 tiếng</option>
+            <option value="10800">3 tiếng</option>
+            <option value="14400">4 tiếng</option>
+            <option value="18000">5 tiếng</option>
+            <option value="21600">6 tiếng</option>
+            <option value="25200">7 tiếng</option>
+            <option value="28800">8 tiếng</option>
+          </select>
+        </div>
+        <div class="card-row">
+          <span class="card-icon">🔥</span>
+          <span class="card-label">Chế độ máy</span>
+          <select id="set-computer-mode">
+            <option value="focus" selected>Tập trung</option>
+            <option value="chill">Chill</option>
+          </select>
+        </div>
+        <div class="card-row">
+          <span class="card-icon">🔒</span>
+          <span class="card-label">Khóa tập trung</span>
+          <label class="switch">
+            <input type="checkbox" id="set-work-focus" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="setting-card">
+        <div class="card-row">
+          <span class="card-icon">💧</span>
+          <span class="card-label">Nhắc uống nước</span>
+          <select id="set-water-interval">
+            <option value="10">⚡ 10s (Test nhanh)</option>
+            <option value="30">⚡ 30s</option>
+            <option value="1800">30 phút</option>
+            <option value="3600" selected>1 tiếng</option>
+            <option value="7200">2 tiếng</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="setting-card">
+        <div class="card-row">
+          <span class="card-icon">⚡</span>
+          <span class="card-label">Thời gian tiêu hao năng lượng</span>
+          <select id="set-energy-duration">
+            <option value="15">⚡ 15 giây (Test thử)</option>
+            <option value="7200" selected>🕒 2 tiếng (Mặc định)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="setting-card">
+        <div class="card-row">
+          <span class="card-icon">🐾</span>
+          <span class="card-label">Tốc độ đi</span>
+          <select id="set-walk-speed">
+            <option value="1.35">🐢 Chậm</option>
+            <option value="1.55" selected>🐾 Chuẩn</option>
+            <option value="1.95">🏃 Nhanh</option>
+            <option value="2.45">⚡ Siêu tốc</option>
+          </select>
+        </div>
+      </div>
+
+      <button id="btn-save" class="save-btn">💾 Lưu & Áp dụng</button>
+    </section>
+
+    <!-- 3. THEME -->
+    <section class="section">
+      <div class="section-label">🎨 Giao Diện</div>
+      <div class="theme-row">
+        <button class="theme-swatch active" data-theme="amber" style="--sw:#fbbf24" title="Amber"></button>
+        <button class="theme-swatch" data-theme="rose" style="--sw:#fb7185" title="Rose"></button>
+        <button class="theme-swatch" data-theme="sky" style="--sw:#38bdf8" title="Sky"></button>
+        <button class="theme-swatch" data-theme="emerald" style="--sw:#34d399" title="Emerald"></button>
+        <button class="theme-swatch" data-theme="violet" style="--sw:#a78bfa" title="Violet"></button>
+        <button class="theme-swatch" data-theme="orange" style="--sw:#fb923c" title="Orange"></button>
+      </div>
+    </section>
+  </main>
+
+  <script src="js/control-panel.js"></script>
+</body>
+</html>

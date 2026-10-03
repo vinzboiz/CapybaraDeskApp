@@ -224,6 +224,7 @@ if (!gotTheLock) {
 }
 
 let mainWindow;
+let controlPanelWindow = null;
 
 function createWindow() {
   const primaryDisplay = screen.getPrimaryDisplay();
@@ -241,7 +242,7 @@ function createWindow() {
     skipTaskbar: true,
     resizable: false,
     hasShadow: false,
-    icon: path.join(__dirname, 'assets', 'icon.png'),
+    icon: path.join(__dirname, 'assets', 'app', 'icon.png'),
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false
@@ -289,6 +290,12 @@ function createWindow() {
         }
       },
       {
+        label: '🎛️ Mở Control Panel',
+        click: () => {
+          toggleControlPanel();
+        }
+      },
+      {
         label: '🚪 Thoát Capy',
         click: () => {
           app.quit();
@@ -300,13 +307,176 @@ function createWindow() {
   });
 }
 
+// ===== CONTROL PANEL WINDOW =====
+function createControlPanel() {
+  if (controlPanelWindow && !controlPanelWindow.isDestroyed()) {
+    controlPanelWindow.focus();
+    return;
+  }
+
+  const primaryDisplay = screen.getPrimaryDisplay();
+  const { width: screenWidth, height: screenHeight } = primaryDisplay.workAreaSize;
+  const { x: areaX, y: areaY } = primaryDisplay.workArea;
+
+  const panelWidth = 320;
+  const panelHeight = 580;
+
+  controlPanelWindow = new BrowserWindow({
+    width: panelWidth,
+    height: panelHeight,
+    x: areaX + screenWidth - panelWidth - 60,
+    y: areaY + screenHeight - panelHeight - 20,
+    transparent: true,
+    frame: false,
+    alwaysOnTop: true,
+    skipTaskbar: false,
+    resizable: false,
+    hasShadow: true,
+    icon: path.join(__dirname, 'assets', 'app', 'icon.png'),
+    webPreferences: {
+      nodeIntegration: false,
+      contextIsolation: true,
+      preload: path.join(__dirname, 'preload-panel.js')
+    }
+  });
+
+  controlPanelWindow.setAlwaysOnTop(true, 'floating');
+  controlPanelWindow.loadFile('control-panel.html');
+
+  controlPanelWindow.on('closed', () => {
+    controlPanelWindow = null;
+    app.quit();
+  });
+}
+
+function toggleControlPanel() {
+  if (controlPanelWindow && !controlPanelWindow.isDestroyed()) {
+    controlPanelWindow.close();
+    controlPanelWindow = null;
+  } else {
+    createControlPanel();
+  }
+}
+
+// ===== IPC: Panel ↔ Pet Window Communication =====
+
+// Panel yêu cầu state hiện tại từ Pet Window
+ipcMain.on('panel-request-state', () => {
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.webContents.send('request-state-for-panel');
+  }
+});
+
+// Pet Window gửi state → forward tới Panel
+ipcMain.on('state-for-panel', (event, state) => {
+  if (controlPanelWindow && !controlPanelWindow.isDestroyed()) {
+    controlPanelWindow.webContents.send('state-update', state);
+  }
+});
+
+// Panel toggle Orange mode → forward tới Pet Window
+ipcMain.on('panel-toggle-orange', (event, isOn) => {
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.webContents.send('panel-toggle-orange', isOn);
+  }
+});
+
+// Panel toggle Wood mode → forward tới Pet Window
+ipcMain.on('panel-toggle-wood', (event, isOn) => {
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.webContents.send('panel-toggle-wood', isOn);
+  }
+});
+
+// Panel trigger Hide
+ipcMain.on('panel-trigger-hide', () => {
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.webContents.send('panel-trigger-hide');
+  }
+});
+
+// Panel trigger Test Hungry
+ipcMain.on('panel-test-hungry', () => {
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.webContents.send('panel-test-hungry');
+  }
+});
+
+// Panel trigger Water reminder
+ipcMain.on('panel-trigger-water', () => {
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.webContents.send('panel-trigger-water');
+  }
+});
+
+// Panel trigger Gate
+ipcMain.on('panel-trigger-gate', () => {
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.webContents.send('panel-trigger-gate');
+  }
+});
+
+// Multi-Monitor Screen Switch: Chuyển cửa sổ Capy sang màn hình tiếp theo
+let currentDisplayIndex = 0;
+ipcMain.on('switch-to-other-screen', () => {
+  if (!mainWindow || mainWindow.isDestroyed()) return;
+  const displays = screen.getAllDisplays();
+  if (displays.length > 1) {
+    currentDisplayIndex = (currentDisplayIndex + 1) % displays.length;
+    const targetDisplay = displays[currentDisplayIndex];
+    const { width, height } = targetDisplay.workAreaSize;
+    const { x, y } = targetDisplay.workArea;
+    mainWindow.setBounds({ x, y, width, height });
+    mainWindow.webContents.send('screen-switched', { width, height, displayIndex: currentDisplayIndex });
+  } else {
+    // 1 màn hình: gửi tín hiệu hoàn tất
+    const bounds = mainWindow.getBounds();
+    mainWindow.webContents.send('screen-switched', { width: bounds.width, height: bounds.height, displayIndex: 0 });
+  }
+});
+
+// Panel save settings → forward tới Pet Window
+ipcMain.on('panel-save-settings', (event, settings) => {
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.webContents.send('panel-save-settings', settings);
+  }
+});
+
+// Panel minimize
+ipcMain.on('panel-minimize', () => {
+  if (controlPanelWindow && !controlPanelWindow.isDestroyed()) {
+    controlPanelWindow.minimize();
+  }
+});
+
+// Panel close (ẩn, không thoát app)
+ipcMain.on('panel-close', () => {
+  if (controlPanelWindow && !controlPanelWindow.isDestroyed()) {
+    controlPanelWindow.close();
+  }
+});
+
+// Panel thoát app
+ipcMain.on('panel-quit-app', () => {
+  app.quit();
+});
+
+// Toggle panel từ Pet Window (nút trên dashboard)
+ipcMain.on('toggle-control-panel', () => {
+  toggleControlPanel();
+});
+
 app.whenReady().then(() => {
   ensureBottleAsset();
   processNewWorkAsset();
   createWindow();
+  createControlPanel();
 
   app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow();
+    if (BrowserWindow.getAllWindows().length === 0) {
+      createWindow();
+      createControlPanel();
+    }
   });
 });
 

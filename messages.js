@@ -8,6 +8,7 @@ var Messages = {
   // 1. KHI CHẠY ĐI LẤY ĐỒ
   fetchTub: 'Đi tắm thôi 🛁',
   fetchDesk: 'Làm việc thôi 💪',
+  fetchDeskChill: 'Chơi game thôi 🎮',
 
   // 2. KHI TẮM ONSEN
   bathRelax: 'Quá đã 🥴 ~~ ',
@@ -24,12 +25,21 @@ var Messages = {
   workNoSession: 'Hiện Capy đang tự do, không trong phiên làm việc nào! 🌱', 
 
   // 4. NHẮC NHỞ UỐNG NƯỚC
-  waterReminder: 'Cái cổ thành cái sa mạc rồi uống nước đi!🥤',
+  waterReminder: 'uống ngay đi bro 🥤',
   waterDrank: 'Gút chóp bro ✨🥰',
 
   // 5. TƯƠNG TÁC QUẢ CAM & DẠO CHƠI
-  foundOrange: 'Thấy quả cam rồi! Đi dạo chơi thôi 🍊✨',
+  foundOrange: 'Come here baby hẹ hẹ',
   almostForgot: 'Tí quên hehe 🤭',
+  woodLogWTF: 'Oắt đờ heo 😳',
+  woodLogAgain: 'Again bro 😤',
+  woodLogEasy: 'Easy game 😎',
+  jumpQuotes: [
+    'Hây ya! 🪵✨',
+    'Nhảy mượt chưa! 🦘',
+    'Pắc cua 😎',
+    'Tuổi con ngan 💅'
+  ],
 
   // 6. THÔNG BÁO CÀI ĐẶT
   settingsSavedChill: 'Đã lưu! Chế độ: Chill thư giãn ☕💻',
@@ -97,7 +107,21 @@ var Messages = {
   sleepAfterLostOrange: 'Đèo mẹ, ngủ thôi',
 
   // 13. CÂU THOẠI KHI CHẠY TRỐN VÀO GÓC
-  hideQuote: 'Chắc ko ai thấy mình'
+  hideQuote: 'Chắc ko ai thấy mình',
+
+  // 14. CÂU THOẠI ĐÒI ĂN (ĐỔI MỖI 3 GIÂY)
+  hungryQuotes: [
+    'Đói bụng quá rồi sen ơi... 🤤',
+    'Cơm đâu cơm đâuuu 🍲',
+    'Bụng sôi ục ục rồi này 🥺',
+    'Xin một miếng ăn đi mà bro 🥺',
+    'Hết pin rồi, cần nạp thức ăn gấp! ⚡',
+    'Cứu đói cho trẫm vớiii 😭',
+    'Alo, bên đó có gì ăn không? 🍔'
+  ],
+
+  // 15. CÂU THOẠI KHI BỎ NHÀ ĐI TẮT APP
+  runawayQuote: 'Đói lả rồi, tớ bỏ nhà đi đây! Tạm biệt...'
 };
 
 // Hỗ trợ cả môi trường Node.js (Electron require) và Browser (<script>)
